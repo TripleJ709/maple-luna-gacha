@@ -172,3 +172,62 @@ test('스윗 합성 결과: 쁘띠/키도 지급되고 개수가 누적', () => 
   assert.equal(rPetit.result.kind, Data.KIND.PETIT);
   assert.equal(s.inventory.key, 1);
 });
+
+function dreamSetup() {
+  const s = S.createState();
+  s.inventory['sweet:프링'] = 1;
+  s.inventory['wb:아쿠엘'] = 1;
+  s.lunaCrystal = 1;
+  return s;
+}
+
+test('드림 합성: 재료(스윗 펫, 원더 블랙, 크리스탈) 소모 후 결과 지급', () => {
+  const s = dreamSetup();
+  const r = S.synthesizeDream(s, 'sweet:프링', 'wb:아쿠엘', seq(0));
+  assert.equal(r.ok, true);
+  assert.equal(s.inventory['sweet:프링'], undefined);
+  assert.equal(s.inventory['wb:아쿠엘'], undefined);
+  assert.equal(s.lunaCrystal, 0);
+  assert.equal(s.inventory[r.result.id], 1);
+});
+
+test('드림 합성: 재료로 쓴 스윗 펫과 같은 종류의 드림 펫은 나오지 않음', () => {
+  const rng = (() => { let x = 12345; return () => ((x = (x * 1103515245 + 12345) % 2147483648) / 2147483648); })();
+  for (let i = 0; i < 3000; i++) {
+    const s = dreamSetup();
+    const r = S.synthesizeDream(s, 'sweet:프링', 'wb:아쿠엘', rng);
+    assert.ok(!(r.result.kind === Data.KIND.DREAM_PET && r.result.name === '프링'));
+  }
+});
+
+test('드림 합성: 드림 펫/쁘띠/스윗 두 개는 재료로 불가', () => {
+  const s = dreamSetup();
+  s.inventory['dream:레옹'] = 1;
+  s.inventory['sweet:주니'] = 1;
+  s.inventory['petit:백야'] = 1;
+  assert.equal(S.synthesizeDream(s, 'dream:레옹', 'wb:아쿠엘').ok, false);
+  assert.equal(S.synthesizeDream(s, 'petit:백야', 'wb:아쿠엘').ok, false);
+  assert.equal(S.synthesizeDream(s, 'sweet:프링', 'sweet:주니').ok, false);
+  assert.equal(s.lunaCrystal, 1);
+  assert.equal(s.inventory['wb:아쿠엘'], 1);
+});
+
+test('드림 합성: 재료/크리스탈 부족은 거부하고 상태 불변', () => {
+  const s = dreamSetup();
+  s.lunaCrystal = 0;
+  const before = JSON.stringify(s);
+  assert.equal(S.synthesizeDream(s, 'sweet:프링', 'wb:아쿠엘').error, '루나 크리스탈이 부족합니다.');
+  s.lunaCrystal = 1;
+  delete s.inventory['wb:아쿠엘'];
+  assert.equal(S.synthesizeDream(s, 'sweet:프링', 'wb:아쿠엘').error, '재료가 부족합니다.');
+  assert.equal(s.inventory['sweet:프링'], 1);
+});
+
+test('드림 합성 결과(드림 펫)는 인벤토리에 쌓이지만 다시 드림 재료가 될 수 없음', () => {
+  const s = dreamSetup();
+  const r = S.synthesizeDream(s, 'sweet:프링', 'wb:아쿠엘', seq(0));
+  assert.equal(r.result.kind, Data.KIND.DREAM_PET);
+  s.inventory['wb:이그넬라'] = 1;
+  s.lunaCrystal = 1;
+  assert.equal(S.synthesizeDream(s, r.result.id, 'wb:이그넬라').ok, false);
+});
