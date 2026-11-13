@@ -3,6 +3,7 @@
  * 상태 변경 함수는 { ok, error? } 를 돌려주고, 성공 시 state를 직접 갱신한다.
  */
 (function (root) {
+  var Data = typeof module !== 'undefined' && module.exports ? require('./data.js') : root.GachaData;
   var STORAGE_KEY = 'mapleLunaGacha.v1';
   var CHARGE_MIN = 10000;
   var CHARGE_MAX = 1000000;
@@ -24,6 +25,24 @@
       return { ok: false, error: '충전 금액은 10,000원 ~ 1,000,000원 사이(10,000원 단위)여야 합니다.' };
     }
     state.cash += amount;
+    return { ok: true };
+  }
+
+  // 판매 상품: 가격(원)과 지급 수량. 가격은 data.js의 PRICES 기준.
+  var PRODUCTS = {
+    wonderBerry1: { label: '원더베리 1개', field: 'wonderBerry', amount: 1, price: Data.PRICES.wonderBerry1 },
+    wonderBerry11: { label: '원더베리 11개', field: 'wonderBerry', amount: 11, price: Data.PRICES.wonderBerry11 },
+    lunaCrystal1: { label: '루나 크리스탈 1개', field: 'lunaCrystal', amount: 1, price: Data.PRICES.lunaCrystal1 }
+  };
+
+  // 구매: 캐시 차감 + 누적 사용 금액 증가 + 재화 지급. 캐시가 부족하면 아무것도 바꾸지 않는다.
+  function purchase(state, productId) {
+    var product = Object.prototype.hasOwnProperty.call(PRODUCTS, productId) ? PRODUCTS[productId] : null;
+    if (!product) return { ok: false, error: '알 수 없는 상품입니다.' };
+    if (state.cash < product.price) return { ok: false, error: '캐시가 부족합니다.' };
+    state.cash -= product.price;
+    state.totalSpent += product.price;
+    state[product.field] += product.amount;
     return { ok: true };
   }
 
@@ -63,6 +82,8 @@
     CHARGE_UNIT: CHARGE_UNIT,
     createState: createState,
     charge: charge,
+    PRODUCTS: PRODUCTS,
+    purchase: purchase,
     load: load,
     save: save
   };
