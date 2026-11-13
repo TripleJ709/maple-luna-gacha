@@ -1,0 +1,6 @@
+/* 기본 스타일: 등급별 색상. 전체 디자인은 Task 7에서 다듬는다. */
+.item { display: inline-block; margin: 2px 6px 2px 0; padding: 2px 8px; border: 1px solid #ccc; border-radius: 4px; }
+.grade-rare { color: #b8860b; border-color: #b8860b; font-weight: bold; }
+.grade-high { color: #6a3fb5; border-color: #6a3fb5; }
+.grade-normal { color: #555; }
+.item img { height: 1em; vertical-align: middle; margin-right: 4px; }

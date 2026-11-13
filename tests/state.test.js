@@ -82,3 +82,34 @@ test('알 수 없는 상품은 거부', () => {
   assert.equal(S.purchase(s, 'toString').ok, false);
   assert.equal(s.cash, 100000);
 });
+
+test('1회 뽑기는 원더베리 1개, 5회 뽑기는 5개를 차감하고 결과를 인벤토리에 누적', () => {
+  const s = S.createState();
+  s.wonderBerry = 6;
+  const r1 = S.drawWonderBerry(s, 1);
+  assert.equal(r1.ok, true);
+  assert.equal(r1.results.length, 1);
+  assert.equal(s.wonderBerry, 5);
+  const r5 = S.drawWonderBerry(s, 5);
+  assert.equal(r5.results.length, 5);
+  assert.equal(s.wonderBerry, 0);
+  const total = Object.values(s.inventory).reduce((a, b) => a + b, 0);
+  assert.equal(total, 6);
+});
+
+test('원더베리 부족/잘못된 횟수는 거부하고 상태 불변', () => {
+  const s = S.createState();
+  s.wonderBerry = 4;
+  const before = JSON.stringify(s);
+  assert.deepEqual(S.drawWonderBerry(s, 5), { ok: false, error: '원더베리가 부족합니다.' });
+  assert.equal(S.drawWonderBerry(s, 2).ok, false);
+  assert.equal(JSON.stringify(s), before);
+});
+
+test('뽑기 결과 id는 모두 ITEM_INDEX에 존재', () => {
+  const Data = require('../js/data.js');
+  const s = S.createState();
+  s.wonderBerry = 300;
+  for (let i = 0; i < 60; i++) S.drawWonderBerry(s, 5);
+  Object.keys(s.inventory).forEach((id) => assert.ok(Data.ITEM_INDEX[id], id));
+});

@@ -4,6 +4,7 @@
  */
 (function (root) {
   var Data = typeof module !== 'undefined' && module.exports ? require('./data.js') : root.GachaData;
+  var Gacha = typeof module !== 'undefined' && module.exports ? require('./gacha.js') : root.Gacha;
   var STORAGE_KEY = 'mapleLunaGacha.v1';
   var CHARGE_MIN = 10000;
   var CHARGE_MAX = 1000000;
@@ -46,6 +47,24 @@
     return { ok: true };
   }
 
+  function addItem(state, id, n) {
+    state.inventory[id] = (state.inventory[id] || 0) + (n || 1);
+  }
+
+  // 원더베리 뽑기: 1회=원더베리 1개, 5회=5개. 부족하면 아무것도 바꾸지 않는다.
+  function drawWonderBerry(state, count, rng) {
+    if (count !== 1 && count !== 5) return { ok: false, error: '뽑기는 1회 또는 5회만 가능합니다.' };
+    if (state.wonderBerry < count) return { ok: false, error: '원더베리가 부족합니다.' };
+    state.wonderBerry -= count;
+    var results = [];
+    for (var i = 0; i < count; i++) {
+      var item = Gacha.rollWonderBerry(rng);
+      addItem(state, item.id, 1);
+      results.push(item);
+    }
+    return { ok: true, results: results };
+  }
+
   // 저장된 값이 깨졌거나 형식이 달라도 기본값으로 안전하게 복구한다.
   function sanitize(raw) {
     var base = createState();
@@ -84,6 +103,8 @@
     charge: charge,
     PRODUCTS: PRODUCTS,
     purchase: purchase,
+    addItem: addItem,
+    drawWonderBerry: drawWonderBerry,
     load: load,
     save: save
   };
