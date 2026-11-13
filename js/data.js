@@ -63,7 +63,12 @@
   var SWEET_TABLE = buildLunaTable('sweet', KIND.SWEET_PET, 9.6, 3.88, 1.96);
   var DREAM_TABLE = buildLunaTable('dream', KIND.DREAM_PET, 8.4, 6.8, 4);
 
+  // id로 아이템 정보를 찾기 위한 색인 (인벤토리 표시용)
+  var ITEM_INDEX = {};
+  WONDER_BERRY_TABLE.concat(SWEET_TABLE, DREAM_TABLE).forEach(function (e) { ITEM_INDEX[e.id] = e; });
+
   var data = {
+    ITEM_INDEX: ITEM_INDEX,
     GRADE: GRADE,
     KIND: KIND,
     PRICES: PRICES,

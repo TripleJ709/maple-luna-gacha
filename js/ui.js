@@ -9,12 +9,61 @@
     chargeBtn: document.getElementById('charge-btn'),
     message: document.getElementById('message'),
     wonderBerry: document.getElementById('wonder-berry'),
-    lunaCrystal: document.getElementById('luna-crystal')
+    lunaCrystal: document.getElementById('luna-crystal'),
+    inventory: document.getElementById('inventory-list'),
+    dialog: document.getElementById('result-dialog'),
+    resultList: document.getElementById('result-list'),
+    resultClose: document.getElementById('result-close')
   };
 
   function won(n) { return n.toLocaleString('ko-KR') + '원'; }
 
+  // 인벤토리 표시 묶음 (순서대로 표시)
+  var K = GachaData.KIND;
+  var INVENTORY_GROUPS = [
+    { title: '원더 블랙 (희귀)', kinds: [K.WONDER_BLACK] },
+    { title: '원더베리 획득 아이템', kinds: [K.WONDER_ITEM] },
+    { title: '루나 스윗 펫', kinds: [K.SWEET_PET] },
+    { title: '루나 드림 펫', kinds: [K.DREAM_PET] },
+    { title: '루나 쁘띠 펫', kinds: [K.PETIT] },
+    { title: '펫장비', kinds: [K.KEY] }
+  ];
+
+  // 아이템 한 개를 이름 카드로 만든다. 이미지가 지정되면 이미지를, 없으면 텍스트를 쓴다.
+  function itemLabel(item, count) {
+    var span = document.createElement('span');
+    span.className = 'item grade-' + item.grade;
+    if (item.image) {
+      var img = document.createElement('img');
+      img.src = item.image;
+      img.alt = item.name;
+      span.appendChild(img);
+    }
+    span.appendChild(document.createTextNode(item.name + (count ? ' x' + count : '')));
+    return span;
+  }
+
+  function renderInventory() {
+    els.inventory.textContent = '';
+    var any = false;
+    INVENTORY_GROUPS.forEach(function (group) {
+      var items = Object.keys(state.inventory)
+        .map(function (id) { return GachaData.ITEM_INDEX[id]; })
+        .filter(function (it) { return it && group.kinds.indexOf(it.kind) !== -1; });
+      if (!items.length) return;
+      any = true;
+      var box = document.createElement('div');
+      var h = document.createElement('h3');
+      h.textContent = group.title;
+      box.appendChild(h);
+      items.forEach(function (it) { box.appendChild(itemLabel(it, state.inventory[it.id])); });
+      els.inventory.appendChild(box);
+    });
+    if (!any) els.inventory.textContent = '아직 획득한 아이템이 없습니다.';
+  }
+
   function render() {
+    renderInventory();
     els.cash.textContent = won(state.cash);
     els.totalSpent.textContent = won(state.totalSpent);
     els.wonderBerry.textContent = state.wonderBerry;
@@ -50,6 +99,23 @@
       if (result.ok) commit();
     });
   });
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-draw]'), function (btn) {
+    btn.addEventListener('click', function () {
+      var result = GameState.drawWonderBerry(state, Number(btn.getAttribute('data-draw')));
+      if (!result.ok) { showMessage(result.error); return; }
+      showMessage('');
+      els.resultList.textContent = '';
+      result.results.forEach(function (it) {
+        var li = document.createElement('li');
+        li.appendChild(itemLabel(it));
+        els.resultList.appendChild(li);
+      });
+      commit();
+      els.dialog.showModal();
+    });
+  });
+  els.resultClose.addEventListener('click', function () { els.dialog.close(); });
 
   render();
 })();

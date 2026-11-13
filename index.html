@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>루나쁘띠 뽑기 시뮬레이터</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <h1>루나쁘띠 뽑기 시뮬레이터</h1>
@@ -25,6 +26,23 @@
     <button type="button" data-product="wonderBerry11">원더베리 11개 (54,000원)</button>
     <button type="button" data-product="lunaCrystal1">루나 크리스탈 1개 (3,900원)</button>
   </section>
+
+  <section id="draw">
+    <h2>위습의 원더베리 뽑기</h2>
+    <button type="button" data-draw="1">1회 뽑기 (원더베리 1개)</button>
+    <button type="button" data-draw="5">5회 뽑기 (원더베리 5개)</button>
+  </section>
+
+  <section id="inventory">
+    <h2>인벤토리</h2>
+    <div id="inventory-list"></div>
+  </section>
+
+  <dialog id="result-dialog">
+    <h2>뽑기 결과</h2>
+    <ul id="result-list"></ul>
+    <button type="button" id="result-close">확인</button>
+  </dialog>
 
   <script src="js/data.js"></script>
   <script src="js/gacha.js"></script>
