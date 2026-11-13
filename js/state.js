@@ -100,6 +100,23 @@
     return { ok: true, result: item };
   }
 
+  // 드림 합성: 스윗 펫 1개(베이스) + 원더 블랙 1개 + 루나 크리스탈 1개.
+  // 베이스와 같은 이름의 드림 펫은 나오지 않는다. 드림 펫은 재료로 쓸 수 없다. 실패 시 상태는 바뀌지 않는다.
+  function synthesizeDream(state, sweetId, blackId, rng) {
+    if (!isKind(sweetId, Data.KIND.SWEET_PET)) return { ok: false, error: '루나 스윗 펫을 선택해야 합니다.' };
+    if (!isKind(blackId, Data.KIND.WONDER_BLACK)) return { ok: false, error: '원더 블랙 펫을 선택해야 합니다.' };
+    var needs = {};
+    needs[sweetId] = 1;
+    needs[blackId] = 1;
+    if (!hasItems(state, needs)) return { ok: false, error: '재료가 부족합니다.' };
+    if (state.lunaCrystal < 1) return { ok: false, error: '루나 크리스탈이 부족합니다.' };
+    removeItems(state, needs);
+    state.lunaCrystal -= 1;
+    var item = Gacha.rollDream(Data.ITEM_INDEX[sweetId].name, rng);
+    addItem(state, item.id, 1);
+    return { ok: true, result: item };
+  }
+
   // 저장된 값이 깨졌거나 형식이 달라도 기본값으로 안전하게 복구한다.
   function sanitize(raw) {
     var base = createState();
@@ -143,6 +160,7 @@
     hasItems: hasItems,
     removeItems: removeItems,
     synthesizeSweet: synthesizeSweet,
+    synthesizeDream: synthesizeDream,
     load: load,
     save: save
   };

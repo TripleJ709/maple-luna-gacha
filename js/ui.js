@@ -17,6 +17,9 @@
     sweetA: document.getElementById('sweet-a'),
     sweetB: document.getElementById('sweet-b'),
     sweetBtn: document.getElementById('sweet-btn'),
+    dreamSweet: document.getElementById('dream-sweet'),
+    dreamBlack: document.getElementById('dream-black'),
+    dreamBtn: document.getElementById('dream-btn'),
     resultClose: document.getElementById('result-close')
   };
 
@@ -66,26 +69,32 @@
     if (!any) els.inventory.textContent = '아직 획득한 아이템이 없습니다.';
   }
 
-  // 합성 재료 선택지: 보유 중인 원더 블랙만 표시. 선택값은 가능하면 유지한다.
-  function renderSweetOptions() {
-    [els.sweetA, els.sweetB].forEach(function (sel) {
-      var prev = sel.value;
-      sel.textContent = '';
-      GachaData.WONDER_BERRY_TABLE.forEach(function (it) {
-        if (it.kind !== GachaData.KIND.WONDER_BLACK || !state.inventory[it.id]) return;
-        var opt = document.createElement('option');
-        opt.value = it.id;
-        opt.textContent = it.name + ' (보유 ' + state.inventory[it.id] + ')';
-        sel.appendChild(opt);
-      });
-      if (!sel.options.length) {
-        var empty = document.createElement('option');
-        empty.value = '';
-        empty.textContent = '원더 블랙 없음';
-        sel.appendChild(empty);
-      }
-      if (prev) sel.value = prev;
+  // 합성 재료 선택지: 보유 중인 해당 종류 아이템만 표시. 선택값은 가능하면 유지한다.
+  function fillOptions(sel, table, kind, emptyText) {
+    var prev = sel.value;
+    sel.textContent = '';
+    table.forEach(function (it) {
+      if (it.kind !== kind || !state.inventory[it.id]) return;
+      var opt = document.createElement('option');
+      opt.value = it.id;
+      opt.textContent = it.name + ' (보유 ' + state.inventory[it.id] + ')';
+      sel.appendChild(opt);
     });
+    if (!sel.options.length) {
+      var empty = document.createElement('option');
+      empty.value = '';
+      empty.textContent = emptyText;
+      sel.appendChild(empty);
+    }
+    if (prev) sel.value = prev;
+  }
+
+  function renderSynthesisOptions() {
+    var black = GachaData.KIND.WONDER_BLACK;
+    fillOptions(els.sweetA, GachaData.WONDER_BERRY_TABLE, black, '원더 블랙 없음');
+    fillOptions(els.sweetB, GachaData.WONDER_BERRY_TABLE, black, '원더 블랙 없음');
+    fillOptions(els.dreamBlack, GachaData.WONDER_BERRY_TABLE, black, '원더 블랙 없음');
+    fillOptions(els.dreamSweet, GachaData.SWEET_TABLE, GachaData.KIND.SWEET_PET, '스윗 펫 없음');
   }
 
   function showResults(title, items) {
@@ -101,7 +110,7 @@
 
   function render() {
     renderInventory();
-    renderSweetOptions();
+    renderSynthesisOptions();
     els.cash.textContent = won(state.cash);
     els.totalSpent.textContent = won(state.totalSpent);
     els.wonderBerry.textContent = state.wonderBerry;
@@ -136,6 +145,14 @@
       showMessage(result.ok ? GameState.PRODUCTS[id].label + ' 구매 완료' : result.error);
       if (result.ok) commit();
     });
+  });
+
+  els.dreamBtn.addEventListener('click', function () {
+    var result = GameState.synthesizeDream(state, els.dreamSweet.value, els.dreamBlack.value);
+    if (!result.ok) { showMessage(result.error); return; }
+    showMessage('');
+    commit();
+    showResults('드림 합성 결과', [result.result]);
   });
 
   Array.prototype.forEach.call(document.querySelectorAll('[data-draw]'), function (btn) {
