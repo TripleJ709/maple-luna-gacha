@@ -7,57 +7,73 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <h1>루나쁘띠 뽑기 시뮬레이터</h1>
-  <p>비공식 팬 프로젝트입니다. 실제 결제는 이루어지지 않습니다.</p>
+  <header class="top">
+    <h1>🌙 루나쁘띠 뽑기 시뮬레이터</h1>
+    <p class="notice">비공식 팬 프로젝트입니다. 실제 결제는 이루어지지 않습니다.</p>
+  </header>
 
-  <section id="wallet">
-    <p>보유 캐시: <strong id="cash">0원</strong></p>
-    <p>누적 사용 금액: <strong id="total-spent">0원</strong></p>
-    <label for="charge-amount">충전 금액</label>
-    <select id="charge-amount"></select>
-    <button id="charge-btn" type="button">캐시 충전</button>
-    <p id="message" role="status"></p>
-  </section>
+  <main class="layout">
+    <section id="wallet" class="panel">
+      <h2>내 캐시</h2>
+      <p class="stat">보유 캐시 <strong id="cash">0원</strong></p>
+      <p class="stat">누적 사용 금액 <strong id="total-spent">0원</strong></p>
+      <div class="row">
+        <label for="charge-amount">충전 금액</label>
+        <select id="charge-amount"></select>
+        <button id="charge-btn" type="button">캐시 충전</button>
+      </div>
+      <p id="message" role="status"></p>
+    </section>
 
-  <section id="shop">
-    <h2>구매</h2>
-    <p>보유 원더베리: <strong id="wonder-berry">0</strong>개 / 보유 루나 크리스탈: <strong id="luna-crystal">0</strong>개</p>
-    <button type="button" data-product="wonderBerry1">원더베리 1개 (5,400원)</button>
-    <button type="button" data-product="wonderBerry11">원더베리 11개 (54,000원)</button>
-    <button type="button" data-product="lunaCrystal1">루나 크리스탈 1개 (3,900원)</button>
-  </section>
+    <section id="shop" class="panel">
+      <h2>🛒 캐시샵</h2>
+      <p class="stat">원더베리 <strong id="wonder-berry">0</strong>개 · 루나 크리스탈 <strong id="luna-crystal">0</strong>개</p>
+      <div class="row">
+        <button type="button" data-product="wonderBerry1">원더베리 1개<small>5,400원</small></button>
+        <button type="button" data-product="wonderBerry11">원더베리 11개<small>54,000원</small></button>
+        <button type="button" data-product="lunaCrystal1">루나 크리스탈 1개<small>3,900원</small></button>
+      </div>
+    </section>
 
-  <section id="draw">
-    <h2>위습의 원더베리 뽑기</h2>
-    <button type="button" data-draw="1">1회 뽑기 (원더베리 1개)</button>
-    <button type="button" data-draw="5">5회 뽑기 (원더베리 5개)</button>
-  </section>
+    <section id="draw" class="panel">
+      <h2>🍓 위습의 원더베리</h2>
+      <p class="desc">원더 블랙 펫 또는 펫 관련 아이템을 획득합니다.</p>
+      <div class="row">
+        <button type="button" class="primary" data-draw="1">1회 뽑기<small>원더베리 1개</small></button>
+        <button type="button" class="primary" data-draw="5">5회 뽑기<small>원더베리 5개</small></button>
+      </div>
+    </section>
 
-  <section id="sweet">
-    <h2>루나 크리스탈 스윗 합성</h2>
-    <p>원더 블랙 펫 2개(종류 무관) + 루나 크리스탈 1개</p>
-    <select id="sweet-a" aria-label="재료 1"></select>
-    <select id="sweet-b" aria-label="재료 2"></select>
-    <button type="button" id="sweet-btn">스윗 합성</button>
-  </section>
+    <section id="sweet" class="panel">
+      <h2>💎 루나 크리스탈 스윗</h2>
+      <p class="desc">원더 블랙 펫 2개(종류 무관) + 루나 크리스탈 1개</p>
+      <div class="row">
+        <select id="sweet-a" aria-label="재료 1"></select>
+        <select id="sweet-b" aria-label="재료 2"></select>
+        <button type="button" class="primary" id="sweet-btn">스윗 합성</button>
+      </div>
+    </section>
 
-  <section id="dream">
-    <h2>루나 크리스탈 드림 합성</h2>
-    <p>루나 스윗 펫 1개 + 원더 블랙 펫 1개 + 루나 크리스탈 1개 (드림 펫은 재료로 쓸 수 없음)</p>
-    <select id="dream-sweet" aria-label="스윗 펫"></select>
-    <select id="dream-black" aria-label="원더 블랙"></select>
-    <button type="button" id="dream-btn">드림 합성</button>
-  </section>
+    <section id="dream" class="panel">
+      <h2>✨ 루나 크리스탈 드림</h2>
+      <p class="desc">루나 스윗 펫 1개 + 원더 블랙 펫 1개 + 루나 크리스탈 1개 (드림 펫은 재료로 쓸 수 없음)</p>
+      <div class="row">
+        <select id="dream-sweet" aria-label="스윗 펫"></select>
+        <select id="dream-black" aria-label="원더 블랙"></select>
+        <button type="button" class="primary" id="dream-btn">드림 합성</button>
+      </div>
+    </section>
 
-  <section id="inventory">
-    <h2>인벤토리</h2>
-    <div id="inventory-list"></div>
-  </section>
+    <section id="inventory" class="panel wide">
+      <h2>🎒 인벤토리</h2>
+      <div id="inventory-list"></div>
+    </section>
+  </main>
 
   <dialog id="result-dialog">
     <h2 id="result-title">뽑기 결과</h2>
     <ul id="result-list"></ul>
-    <button type="button" id="result-close">확인</button>
+    <button type="button" class="primary" id="result-close">확인</button>
   </dialog>
 
   <script src="js/data.js"></script>
