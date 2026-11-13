@@ -7,7 +7,9 @@
     totalSpent: document.getElementById('total-spent'),
     amount: document.getElementById('charge-amount'),
     chargeBtn: document.getElementById('charge-btn'),
-    message: document.getElementById('message')
+    message: document.getElementById('message'),
+    wonderBerry: document.getElementById('wonder-berry'),
+    lunaCrystal: document.getElementById('luna-crystal')
   };
 
   function won(n) { return n.toLocaleString('ko-KR') + '원'; }
@@ -15,6 +17,8 @@
   function render() {
     els.cash.textContent = won(state.cash);
     els.totalSpent.textContent = won(state.totalSpent);
+    els.wonderBerry.textContent = state.wonderBerry;
+    els.lunaCrystal.textContent = state.lunaCrystal;
   }
 
   function showMessage(text) { els.message.textContent = text || ''; }
@@ -36,6 +40,15 @@
     var result = GameState.charge(state, Number(els.amount.value));
     showMessage(result.ok ? won(Number(els.amount.value)) + ' 충전 완료 (가상 결제)' : result.error);
     if (result.ok) commit();
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-product]'), function (btn) {
+    btn.addEventListener('click', function () {
+      var id = btn.getAttribute('data-product');
+      var result = GameState.purchase(state, id);
+      showMessage(result.ok ? GameState.PRODUCTS[id].label + ' 구매 완료' : result.error);
+      if (result.ok) commit();
+    });
   });
 
   render();
