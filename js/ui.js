@@ -43,7 +43,8 @@
     if (item.image) {
       var img = document.createElement('img');
       img.src = item.image;
-      img.alt = item.name;
+      img.alt = '';
+      span.classList.add('has-img');
       span.appendChild(img);
     }
     span.appendChild(document.createTextNode(item.name + (count ? ' x' + count : '')));

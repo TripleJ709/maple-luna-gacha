@@ -54,7 +54,10 @@ select { max-width: 100%; }
 .grade-rare { color: var(--rare); font-weight: bold; box-shadow: 0 0 8px rgba(255, 212, 71, 0.5); }
 .grade-high { color: var(--high); }
 .grade-normal { color: var(--normal); }
-.item img { height: 1.2em; vertical-align: middle; margin-right: 4px; }
+.item.has-img { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 8px; font-size: 0.8rem; text-align: center; max-width: 120px; }
+.item img { height: 64px; width: auto; max-width: 100%; object-fit: contain; }
+dialog .item.has-img { max-width: 160px; font-size: 0.9rem; }
+dialog .item img { height: 96px; }
 
 /* 결과 팝업 */
 dialog { background: var(--panel); color: var(--text); border: 2px solid var(--gold); border-radius: 14px; min-width: min(90vw, 340px); text-align: center; }
