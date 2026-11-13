@@ -65,6 +65,41 @@
     return { ok: true, results: results };
   }
 
+  // 인벤토리에서 재료 수량을 확인하고 한 번에 소모한다. needs: { id: 필요 개수 }
+  function hasItems(state, needs) {
+    return Object.keys(needs).every(function (id) { return (state.inventory[id] || 0) >= needs[id]; });
+  }
+
+  function removeItems(state, needs) {
+    Object.keys(needs).forEach(function (id) {
+      state.inventory[id] -= needs[id];
+      if (state.inventory[id] <= 0) delete state.inventory[id];
+    });
+  }
+
+  function isKind(id, kind) {
+    var it = Data.ITEM_INDEX[id];
+    return !!it && it.kind === kind;
+  }
+
+  // 스윗 합성: 원더 블랙 2개(종류 무관, 같은 종류 2개도 가능) + 루나 크리스탈 1개.
+  // 결과: 루나 스윗 펫 / 루나 쁘띠 / 루나 크리스탈 키. 실패 시 상태는 바뀌지 않는다.
+  function synthesizeSweet(state, idA, idB, rng) {
+    if (!isKind(idA, Data.KIND.WONDER_BLACK) || !isKind(idB, Data.KIND.WONDER_BLACK)) {
+      return { ok: false, error: '원더 블랙 펫 2개를 선택해야 합니다.' };
+    }
+    var needs = {};
+    needs[idA] = (needs[idA] || 0) + 1;
+    needs[idB] = (needs[idB] || 0) + 1;
+    if (!hasItems(state, needs)) return { ok: false, error: '재료가 부족합니다.' };
+    if (state.lunaCrystal < 1) return { ok: false, error: '루나 크리스탈이 부족합니다.' };
+    removeItems(state, needs);
+    state.lunaCrystal -= 1;
+    var item = Gacha.rollSweet(rng);
+    addItem(state, item.id, 1);
+    return { ok: true, result: item };
+  }
+
   // 저장된 값이 깨졌거나 형식이 달라도 기본값으로 안전하게 복구한다.
   function sanitize(raw) {
     var base = createState();
@@ -105,6 +140,9 @@
     purchase: purchase,
     addItem: addItem,
     drawWonderBerry: drawWonderBerry,
+    hasItems: hasItems,
+    removeItems: removeItems,
+    synthesizeSweet: synthesizeSweet,
     load: load,
     save: save
   };

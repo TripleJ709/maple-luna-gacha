@@ -13,6 +13,10 @@
     inventory: document.getElementById('inventory-list'),
     dialog: document.getElementById('result-dialog'),
     resultList: document.getElementById('result-list'),
+    resultTitle: document.getElementById('result-title'),
+    sweetA: document.getElementById('sweet-a'),
+    sweetB: document.getElementById('sweet-b'),
+    sweetBtn: document.getElementById('sweet-btn'),
     resultClose: document.getElementById('result-close')
   };
 
@@ -62,8 +66,42 @@
     if (!any) els.inventory.textContent = '아직 획득한 아이템이 없습니다.';
   }
 
+  // 합성 재료 선택지: 보유 중인 원더 블랙만 표시. 선택값은 가능하면 유지한다.
+  function renderSweetOptions() {
+    [els.sweetA, els.sweetB].forEach(function (sel) {
+      var prev = sel.value;
+      sel.textContent = '';
+      GachaData.WONDER_BERRY_TABLE.forEach(function (it) {
+        if (it.kind !== GachaData.KIND.WONDER_BLACK || !state.inventory[it.id]) return;
+        var opt = document.createElement('option');
+        opt.value = it.id;
+        opt.textContent = it.name + ' (보유 ' + state.inventory[it.id] + ')';
+        sel.appendChild(opt);
+      });
+      if (!sel.options.length) {
+        var empty = document.createElement('option');
+        empty.value = '';
+        empty.textContent = '원더 블랙 없음';
+        sel.appendChild(empty);
+      }
+      if (prev) sel.value = prev;
+    });
+  }
+
+  function showResults(title, items) {
+    els.resultTitle.textContent = title;
+    els.resultList.textContent = '';
+    items.forEach(function (it) {
+      var li = document.createElement('li');
+      li.appendChild(itemLabel(it));
+      els.resultList.appendChild(li);
+    });
+    els.dialog.showModal();
+  }
+
   function render() {
     renderInventory();
+    renderSweetOptions();
     els.cash.textContent = won(state.cash);
     els.totalSpent.textContent = won(state.totalSpent);
     els.wonderBerry.textContent = state.wonderBerry;
@@ -105,15 +143,17 @@
       var result = GameState.drawWonderBerry(state, Number(btn.getAttribute('data-draw')));
       if (!result.ok) { showMessage(result.error); return; }
       showMessage('');
-      els.resultList.textContent = '';
-      result.results.forEach(function (it) {
-        var li = document.createElement('li');
-        li.appendChild(itemLabel(it));
-        els.resultList.appendChild(li);
-      });
       commit();
-      els.dialog.showModal();
+      showResults('뽑기 결과', result.results);
     });
+  });
+
+  els.sweetBtn.addEventListener('click', function () {
+    var result = GameState.synthesizeSweet(state, els.sweetA.value, els.sweetB.value);
+    if (!result.ok) { showMessage(result.error); return; }
+    showMessage('');
+    commit();
+    showResults('스윗 합성 결과', [result.result]);
   });
   els.resultClose.addEventListener('click', function () { els.dialog.close(); });
 
