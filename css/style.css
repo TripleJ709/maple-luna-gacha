@@ -1,6 +1,80 @@
-/* 기본 스타일: 등급별 색상. 전체 디자인은 Task 7에서 다듬는다. */
-.item { display: inline-block; margin: 2px 6px 2px 0; padding: 2px 8px; border: 1px solid #ccc; border-radius: 4px; }
-.grade-rare { color: #b8860b; border-color: #b8860b; font-weight: bold; }
-.grade-high { color: #6a3fb5; border-color: #6a3fb5; }
-.grade-normal { color: #555; }
-.item img { height: 1em; vertical-align: middle; margin-right: 4px; }
+/* 게임 느낌의 어두운 톤: 짙은 남색 배경 + 금색 포인트. 이미지 없이 CSS만 사용. */
+:root {
+  --bg: #0e1230;
+  --panel: #1a2050;
+  --panel-edge: #3a447f;
+  --gold: #f5c542;
+  --text: #e8ebff;
+  --muted: #9aa3d6;
+  --rare: #ffd447;
+  --high: #b894ff;
+  --normal: #b5bbd9;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 16px;
+  background: radial-gradient(circle at 50% -10%, #28306e 0%, var(--bg) 60%) fixed;
+  color: var(--text);
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+}
+.top { text-align: center; margin-bottom: 16px; }
+h1 { margin: 0; color: var(--gold); text-shadow: 0 2px 8px rgba(245, 197, 66, 0.4); font-size: 1.6rem; }
+.notice { margin: 4px 0 0; color: var(--muted); font-size: 0.85rem; }
+
+.layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; max-width: 1100px; margin: 0 auto; }
+.panel { background: var(--panel); border: 2px solid var(--panel-edge); border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35); }
+.panel.wide { grid-column: 1 / -1; }
+h2 { margin: 0 0 8px; font-size: 1.05rem; color: var(--gold); border-bottom: 1px solid var(--panel-edge); padding-bottom: 6px; }
+h3 { margin: 10px 0 4px; font-size: 0.9rem; color: var(--muted); }
+.desc { margin: 0 0 10px; color: var(--muted); font-size: 0.85rem; }
+.stat { margin: 4px 0; display: flex; justify-content: space-between; }
+.stat strong { color: var(--gold); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+#message { min-height: 1.2em; margin: 8px 0 0; color: #ff9f9f; font-size: 0.85rem; }
+
+button, select {
+  font: inherit;
+  color: var(--text);
+  background: #262e6a;
+  border: 1px solid var(--panel-edge);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+button { cursor: pointer; display: inline-flex; flex-direction: column; align-items: center; transition: transform 0.1s, filter 0.15s; }
+button:hover { filter: brightness(1.25); }
+button:active { transform: translateY(1px) scale(0.98); }
+button small { color: var(--muted); font-size: 0.75rem; }
+button.primary { background: linear-gradient(#f7d25d, #e0a21f); color: #2a1d00; border-color: #fff1b0; font-weight: bold; }
+button.primary small { color: #5a4300; }
+select { max-width: 100%; }
+
+/* 아이템 카드 (등급별 색상). 이미지가 있으면 이름 앞에 표시된다. */
+.item { display: inline-block; margin: 3px 6px 3px 0; padding: 4px 10px; border: 1px solid currentColor; border-radius: 6px; background: rgba(0, 0, 0, 0.25); }
+.grade-rare { color: var(--rare); font-weight: bold; box-shadow: 0 0 8px rgba(255, 212, 71, 0.5); }
+.grade-high { color: var(--high); }
+.grade-normal { color: var(--normal); }
+.item img { height: 1.2em; vertical-align: middle; margin-right: 4px; }
+
+/* 결과 팝업 */
+dialog { background: var(--panel); color: var(--text); border: 2px solid var(--gold); border-radius: 14px; min-width: min(90vw, 340px); text-align: center; }
+dialog::backdrop { background: rgba(5, 8, 25, 0.75); }
+dialog[open] { animation: pop 0.25s ease-out; }
+dialog ul { list-style: none; padding: 0; margin: 12px 0; }
+dialog li { opacity: 0; animation: reveal 0.35s ease-out forwards; }
+dialog li:nth-child(1) { animation-delay: 0.05s; }
+dialog li:nth-child(2) { animation-delay: 0.2s; }
+dialog li:nth-child(3) { animation-delay: 0.35s; }
+dialog li:nth-child(4) { animation-delay: 0.5s; }
+dialog li:nth-child(5) { animation-delay: 0.65s; }
+@keyframes pop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes reveal { from { transform: translateY(8px) scale(0.9); opacity: 0; } to { transform: none; opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  dialog[open], dialog li { animation: none; opacity: 1; }
+}
+@media (max-width: 480px) {
+  body { padding: 10px; }
+  h1 { font-size: 1.3rem; }
+  .row > * { flex: 1 1 auto; }
+}
