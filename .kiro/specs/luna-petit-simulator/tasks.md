@@ -28,4 +28,4 @@
 - [x] **Task 6: 루나 크리스탈 드림 합성**
 - [x] **Task 7: 게임 화면과 비슷한 디자인(텍스트 기반)**
   - 수동 확인 체크리스트: `ui-checklist.md` (화면 확인은 사용자 몫)
-- [ ] **Task 8: GitHub Pages 배포와 문서화** (README, 비공식 팬 프로젝트 고지)
+- [x] **Task 8: GitHub Pages 배포와 문서화** (README, 비공식 팬 프로젝트 고지)
