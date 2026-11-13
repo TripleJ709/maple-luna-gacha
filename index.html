@@ -8,7 +8,19 @@
 <body>
   <h1>루나쁘띠 뽑기 시뮬레이터</h1>
   <p>비공식 팬 프로젝트입니다. 실제 결제는 이루어지지 않습니다.</p>
+
+  <section id="wallet">
+    <p>보유 캐시: <strong id="cash">0원</strong></p>
+    <p>누적 사용 금액: <strong id="total-spent">0원</strong></p>
+    <label for="charge-amount">충전 금액</label>
+    <select id="charge-amount"></select>
+    <button id="charge-btn" type="button">캐시 충전</button>
+    <p id="message" role="status"></p>
+  </section>
+
   <script src="js/data.js"></script>
   <script src="js/gacha.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/ui.js"></script>
 </body>
 </html>
