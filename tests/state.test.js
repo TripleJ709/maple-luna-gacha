@@ -113,3 +113,62 @@ test('뽑기 결과 id는 모두 ITEM_INDEX에 존재', () => {
   for (let i = 0; i < 60; i++) S.drawWonderBerry(s, 5);
   Object.keys(s.inventory).forEach((id) => assert.ok(Data.ITEM_INDEX[id], id));
 });
+
+const Data = require('../js/data.js');
+const seq = (...vals) => { let i = 0; return () => vals[i++ % vals.length]; };
+
+test('스윗 합성: 같은 종류 2개(이그넬라+이그넬라) 가능, 재료와 크리스탈 소모, 결과 지급', () => {
+  const s = S.createState();
+  s.inventory['wb:이그넬라'] = 2;
+  s.lunaCrystal = 1;
+  const r = S.synthesizeSweet(s, 'wb:이그넬라', 'wb:이그넬라', seq(0));
+  assert.equal(r.ok, true);
+  assert.equal(r.result.kind, Data.KIND.SWEET_PET);
+  assert.equal(s.inventory['wb:이그넬라'], undefined);
+  assert.equal(s.lunaCrystal, 0);
+  assert.equal(s.inventory[r.result.id], 1);
+});
+
+test('스윗 합성: 다른 종류 2개(이그넬라+아쿠엘) 가능', () => {
+  const s = S.createState();
+  s.inventory['wb:이그넬라'] = 1;
+  s.inventory['wb:아쿠엘'] = 3;
+  s.lunaCrystal = 2;
+  assert.equal(S.synthesizeSweet(s, 'wb:이그넬라', 'wb:아쿠엘').ok, true);
+  assert.equal(s.inventory['wb:이그넬라'], undefined);
+  assert.equal(s.inventory['wb:아쿠엘'], 2);
+  assert.equal(s.lunaCrystal, 1);
+});
+
+test('스윗 합성: 같은 종류를 1개만 가지고 2개로 선택하면 거부, 상태 불변', () => {
+  const s = S.createState();
+  s.inventory['wb:윈디르'] = 1;
+  s.lunaCrystal = 1;
+  const before = JSON.stringify(s);
+  assert.deepEqual(S.synthesizeSweet(s, 'wb:윈디르', 'wb:윈디르'), { ok: false, error: '재료가 부족합니다.' });
+  assert.equal(JSON.stringify(s), before);
+});
+
+test('스윗 합성: 크리스탈 부족 / 원더 블랙이 아닌 재료는 거부', () => {
+  const s = S.createState();
+  s.inventory['wb:이그넬라'] = 2;
+  s.inventory['wb:카투'] = 2;
+  assert.equal(S.synthesizeSweet(s, 'wb:이그넬라', 'wb:이그넬라').error, '루나 크리스탈이 부족합니다.');
+  s.lunaCrystal = 1;
+  assert.equal(S.synthesizeSweet(s, 'wb:이그넬라', 'wb:카투').ok, false);
+  assert.equal(S.synthesizeSweet(s, 'nope', 'wb:이그넬라').ok, false);
+  assert.equal(s.inventory['wb:이그넬라'], 2);
+  assert.equal(s.lunaCrystal, 1);
+});
+
+test('스윗 합성 결과: 쁘띠/키도 지급되고 개수가 누적', () => {
+  const s = S.createState();
+  s.inventory['wb:이그넬라'] = 4;
+  s.lunaCrystal = 2;
+  // 표 끝부분(키 1.96%)과 쁘띠 구간을 강제로 뽑는다.
+  const rKey = S.synthesizeSweet(s, 'wb:이그넬라', 'wb:이그넬라', () => 0.999);
+  assert.equal(rKey.result.kind, Data.KIND.KEY);
+  const rPetit = S.synthesizeSweet(s, 'wb:이그넬라', 'wb:이그넬라', () => 0.9);
+  assert.equal(rPetit.result.kind, Data.KIND.PETIT);
+  assert.equal(s.inventory.key, 1);
+});

@@ -33,13 +33,21 @@
     <button type="button" data-draw="5">5회 뽑기 (원더베리 5개)</button>
   </section>
 
+  <section id="sweet">
+    <h2>루나 크리스탈 스윗 합성</h2>
+    <p>원더 블랙 펫 2개(종류 무관) + 루나 크리스탈 1개</p>
+    <select id="sweet-a" aria-label="재료 1"></select>
+    <select id="sweet-b" aria-label="재료 2"></select>
+    <button type="button" id="sweet-btn">스윗 합성</button>
+  </section>
+
   <section id="inventory">
     <h2>인벤토리</h2>
     <div id="inventory-list"></div>
   </section>
 
   <dialog id="result-dialog">
-    <h2>뽑기 결과</h2>
+    <h2 id="result-title">뽑기 결과</h2>
     <ul id="result-list"></ul>
     <button type="button" id="result-close">확인</button>
   </dialog>
