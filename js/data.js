@@ -5,7 +5,7 @@
  *  - 루나 크리스탈 스윗: https://maplestory.nexon.com/Guide/CashShop/Probability/LunaCrystalSweet
  *  - 루나 크리스탈 드림: https://maplestory.nexon.com/Guide/CashShop/Probability/LunaCrystalDream
  *
- * image: 나중에 assets/ 폴더의 이미지 경로를 이 필드에 넣으면 화면에 반영된다. (null이면 텍스트로 표시)
+ * image: IMAGES에 이름별 경로를 추가하면 화면에 반영된다. (null이면 텍스트로 표시)
  */
 (function (root) {
   var GRADE = { RARE: 'rare', HIGH: 'high', NORMAL: 'normal' };
@@ -24,8 +24,26 @@
     lunaCrystal1: 3900
   };
 
+  // 이름 -> 이미지 경로. 같은 이름의 스윗/드림 펫은 같은 이미지를 쓴다.
+  // 이미지가 아직 없는 아이템은 여기에 추가하기 전까지 텍스트로 표시된다.
+  var IMAGES = {
+    '이그넬라': 'assets/items/ignella.png',
+    '아쿠엘': 'assets/items/aquel.png',
+    '윈디르': 'assets/items/windir.png',
+    '카투': 'assets/items/katu.png',
+    '카티엘': 'assets/items/katiel.png',
+    '파라키': 'assets/items/paraki.png',
+    '쿠키베어': 'assets/items/cookie-bear.png',
+    '뚠냥': 'assets/items/ttunnyang.png',
+    '오가닉 원더 쿠키': 'assets/items/organic-cookie.png',
+    '고농축 프리미엄 생명의 물': 'assets/items/life-water.png',
+    '백야': 'assets/items/baegya.png',
+    '설아': 'assets/items/seola.png',
+    '쁘띠 블러드': 'assets/items/petit-blood.png'
+  };
+
   function item(id, name, kind, grade, prob) {
-    return { id: id, name: name, kind: kind, grade: grade, prob: prob, image: null };
+    return { id: id, name: name, kind: kind, grade: grade, prob: prob, image: IMAGES[name] || null };
   }
 
   var WONDER_BERRY_TABLE = [
