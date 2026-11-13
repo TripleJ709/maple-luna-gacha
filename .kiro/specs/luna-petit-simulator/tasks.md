@@ -21,7 +21,7 @@
 
 - [x] **Task 1: 프로젝트 골격과 확률 데이터** (`data.js`, `gacha.js`, 빈 `index.html`, 확률 테스트)
   - 테스트 실행: `node --test "tests/*.test.js"` (7개 통과)
-- [ ] **Task 2: 상태 관리와 캐시 충전** (`state.js`, localStorage, 충전 UI)
+- [x] **Task 2: 상태 관리와 캐시 충전** (`state.js`, localStorage, 충전 UI)
 - [ ] **Task 3: 재화 구매** (원더베리 1/11개, 루나 크리스탈)
 - [ ] **Task 4: 원더베리 뽑기와 인벤토리** (1회/5회, 결과 팝업)
 - [ ] **Task 5: 루나 크리스탈 스윗 합성**
