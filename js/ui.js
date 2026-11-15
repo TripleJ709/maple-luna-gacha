@@ -149,7 +149,7 @@
   function rareTitle(rareItems, fallback) {
     var petit = rareItems.filter(function (it) { return it.kind === GachaData.KIND.PETIT; })[0];
     if (petit) return '🌙 루나 쁘띠 획득! 🌙';
-    return '✨ 희귀 원더 블랙 획득! ✨';
+    return fallback;
   }
 
   function showResults(title, items) {
