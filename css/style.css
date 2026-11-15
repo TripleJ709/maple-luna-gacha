@@ -31,7 +31,29 @@ h3 { margin: 10px 0 4px; font-size: 0.9rem; color: var(--muted); }
 .stat { margin: 4px 0; display: flex; justify-content: space-between; }
 .stat strong { color: var(--gold); }
 .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
-#message { min-height: 1.2em; max-width: 1100px; margin: 6px auto 8px; color: #ffb3b3; font-size: 0.9rem; text-align: center; }
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  z-index: 100;
+  min-width: min(88vw, 320px);
+  max-width: min(88vw, 560px);
+  margin: 0;
+  padding: 11px 16px;
+  border: 1px solid var(--panel-edge);
+  border-radius: 10px;
+  background: rgba(18, 23, 60, 0.97);
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 14px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.toast.visible { opacity: 1; transform: translate(-50%, 0); }
+.toast.success { border-color: #5fbf85; }
+.toast.error { border-color: #e36d89; color: #ffd4dd; }
 
 /* 상단 재화 표시줄과 탭 */
 .status-bar {
