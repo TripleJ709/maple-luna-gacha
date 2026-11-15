@@ -42,8 +42,29 @@
     '쁘띠 블러드': 'assets/items/petit-blood.png'
   };
 
+  // 이름 -> 움직이는 펫 이미지(mp4, gif). 결과 팝업에서 우선 보여주고, 정지 이미지가 없으면 인벤토리에서도 쓴다.
+  var ANIMS = {
+    '이그넬라': 'assets/anim/ignella.mp4',
+    '아쿠엘': 'assets/anim/aquel.mp4',
+    '윈디르': 'assets/anim/windir.mp4',
+    '카투': 'assets/anim/katu.mp4',
+    '카티엘': 'assets/anim/katiel.gif',
+    '파라키': 'assets/anim/paraki.mp4',
+    '쿠키베어': 'assets/anim/cookie-bear.mp4',
+    '뚠냥': 'assets/anim/ttunnyang.mp4',
+    '쿨쿨 곰돌이': 'assets/anim/kulkul-bear.mp4',
+    '쿨쿨 다람쥐': 'assets/anim/kulkul-squirrel.mp4',
+    '쿨쿨 너구리': 'assets/anim/kulkul-raccoon.mp4',
+    '프링': 'assets/anim/pring.mp4',
+    '레옹': 'assets/anim/leon.mp4',
+    '주니': 'assets/anim/juni.mp4',
+    '토토 사원': 'assets/anim/toto.mp4',
+    '곰곰 사원': 'assets/anim/gomgom.mp4',
+    '펭펭 사원': 'assets/anim/pengpeng.mp4'
+  };
+
   function item(id, name, kind, grade, prob) {
-    return { id: id, name: name, kind: kind, grade: grade, prob: prob, image: IMAGES[name] || null };
+    return { id: id, name: name, kind: kind, grade: grade, prob: prob, image: IMAGES[name] || null, anim: ANIMS[name] || null };
   }
 
   var WONDER_BERRY_TABLE = [
@@ -93,7 +114,8 @@
     WONDER_BERRY_TABLE: WONDER_BERRY_TABLE,
     SWEET_TABLE: SWEET_TABLE,
     DREAM_TABLE: DREAM_TABLE,
-    KEY_ID: 'key'
+    KEY_ID: 'key',
+    WONDER_BERRY_ICON: 'assets/items/wonderberry.webp'
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = data;

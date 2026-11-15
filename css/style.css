@@ -64,9 +64,12 @@ select { max-width: 100%; }
 .grade-high { color: var(--high); }
 .grade-normal { color: var(--normal); }
 .item.has-img { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 8px; font-size: 0.8rem; text-align: center; max-width: 120px; }
-.item img { height: 64px; width: auto; max-width: 100%; object-fit: contain; }
+.item img, .item video { height: 64px; width: auto; max-width: 100%; object-fit: contain; }
+/* 움직이는 펫 영상은 흰 배경이라 밝은 칸에 담고, 작은 픽셀 그림이 뭉개지지 않게 확대한다. */
+.item .sprite { background: #fff; border-radius: 8px; padding: 4px; image-rendering: pixelated; min-width: 64px; }
+.icon { height: 24px; width: 24px; vertical-align: middle; image-rendering: pixelated; }
 dialog .item.has-img { max-width: 160px; font-size: 0.9rem; }
-dialog .item img { height: 96px; }
+dialog .item img, dialog .item video { height: 96px; }
 
 #auto-result p { margin: 6px 0; }
 #auto-result p:first-child { color: var(--gold); font-weight: bold; }
@@ -83,7 +86,7 @@ button.danger { background: #4a1f2e; border-color: #a34a63; color: #ffc9d6; }
 #history-list li { padding: 6px 0; border-bottom: 1px solid var(--panel-edge); }
 .history-meta { display: block; color: var(--muted); font-size: 0.8rem; margin-bottom: 2px; }
 #history-list .item.has-img { max-width: 90px; font-size: 0.7rem; }
-#history-list .item img { height: 40px; }
+#history-list .item img, #history-list .item video { height: 40px; }
 
 /* 결과 팝업 */
 dialog { background: var(--panel); color: var(--text); border: 2px solid var(--gold); border-radius: 14px; min-width: min(90vw, 340px); text-align: center; }
