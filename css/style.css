@@ -217,9 +217,24 @@ dialog.rare-result li.rare-card .item { box-shadow: 0 0 22px rgba(255, 226, 122,
 @media (max-width: 480px) {
   body { padding: 10px; }
   h1 { font-size: 1.3rem; }
-  .status-bar { top: 4px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 10px; font-size: 0.8rem; }
-  .status-bar .status-item { min-width: 0; justify-content: center; }
-  .status-bar .status-item:nth-child(3) { grid-column: 1 / -1; }
+  .status-bar {
+    position: static;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    font-size: 0.85rem;
+  }
+  .status-bar .status-item {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    align-items: center;
+    justify-content: initial;
+    width: min(100%, 280px);
+    min-width: 0;
+    margin: 0 auto;
+    gap: 8px;
+  }
+  .status-bar .status-item:nth-child(3) { grid-column: auto; }
   .status-symbol, .status-bar .icon { width: 22px; height: 22px; flex-basis: 22px; }
   .product-grid { grid-template-columns: 1fr; }
   .product-card { min-height: 112px; }
