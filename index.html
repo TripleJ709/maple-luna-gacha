@@ -62,19 +62,15 @@
     </div>
 
     <div class="tab-panel" id="tab-synth" role="tabpanel" hidden>
-      <section id="sweet" class="panel">
-        <h2><img class="icon" src="assets/items/luna-crystal.webp" alt=""> 루나 크리스탈 스윗</h2>
-        <p class="desc">원더 블랙 펫 2개(종류 무관) + 루나 크리스탈 1개</p>
+      <section id="luna" class="panel wide">
+        <h2><img class="icon" src="assets/items/luna-crystal.webp" alt=""> 루나 크리스탈</h2>
+        <p class="desc">원더 블랙 펫이나 루나 스윗 펫을 넣고 합성합니다. 넣은 재료에 따라 합성 종류와 확률이 달라집니다.</p>
+        <ul class="desc rules">
+          <li>원더 블랙 + 원더 블랙: 스윗 합성</li>
+          <li>루나 스윗 펫 + 원더 블랙: 드림 합성 (드림 펫은 재료로 쓸 수 없음)</li>
+        </ul>
         <div class="row">
-          <button type="button" class="primary" id="open-sweet">루나 크리스탈 사용하기</button>
-        </div>
-      </section>
-
-      <section id="dream" class="panel">
-        <h2><img class="icon" src="assets/items/luna-crystal.webp" alt=""> 루나 크리스탈 드림</h2>
-        <p class="desc">루나 스윗 펫 1개 + 원더 블랙 펫 1개 + 루나 크리스탈 1개 (드림 펫은 재료로 쓸 수 없음)</p>
-        <div class="row">
-          <button type="button" class="primary" id="open-dream">루나 크리스탈 사용하기</button>
+          <button type="button" class="primary" id="open-luna">루나 크리스탈 사용하기</button>
         </div>
       </section>
     </div>
@@ -125,7 +121,8 @@
     <h2 id="synth-title">합성</h2>
     <p class="desc" id="synth-info"></p>
     <div id="synth-slots" class="slots"></div>
-    <h3>인벤토리에서 재료 선택</h3>
+    <div id="synth-preview"></div>
+    <h3>재료 선택 (원더 블랙, 루나 스윗 펫)</h3>
     <div id="synth-picker"></div>
     <p id="synth-error" role="alert"></p>
     <div class="row">
