@@ -23,6 +23,7 @@
     <button type="button" role="tab" class="tab active" data-tab="cash" aria-selected="true">💰 캐시 / 캐시샵</button>
     <button type="button" role="tab" class="tab" data-tab="draw" aria-selected="false">🍓 원더베리 뽑기</button>
     <button type="button" role="tab" class="tab" data-tab="synth" aria-selected="false">💎 스윗 / 드림 합성</button>
+    <button type="button" role="tab" class="tab" data-tab="stats" aria-selected="false">📊 통계 / 기록</button>
   </nav>
   <p id="message" role="status"></p>
 
@@ -81,6 +82,18 @@
       </section>
     </div>
 
+    <div class="tab-panel" id="tab-stats" role="tabpanel" hidden>
+      <section class="panel wide">
+        <h2>📊 결과 비율 (실제 vs 공식 확률)</h2>
+        <p class="desc">횟수가 적을수록 공식 확률과 차이가 큰 것이 정상입니다. 횟수가 늘수록 공식 확률에 가까워집니다.</p>
+        <div id="stats-list"></div>
+      </section>
+      <section class="panel wide">
+        <h2>🕒 최근 기록 (최대 50개)</h2>
+        <ul id="history-list"></ul>
+      </section>
+    </div>
+
     <section id="inventory" class="panel wide">
       <h2>🎒 인벤토리</h2>
       <div id="inventory-list"></div>
@@ -96,6 +109,7 @@
   <script src="js/data.js"></script>
   <script src="js/gacha.js"></script>
   <script src="js/state.js"></script>
+  <script src="js/stats.js"></script>
   <script src="js/ui.js"></script>
 </body>
 </html>

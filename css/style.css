@@ -68,6 +68,17 @@ select { max-width: 100%; }
 dialog .item.has-img { max-width: 160px; font-size: 0.9rem; }
 dialog .item img { height: 96px; }
 
+/* 통계 표와 기록 */
+.stats-table { width: 100%; border-collapse: collapse; margin-bottom: 6px; font-size: 0.9rem; }
+.stats-table th, .stats-table td { padding: 5px 8px; border-bottom: 1px solid var(--panel-edge); text-align: right; }
+.stats-table th:first-child, .stats-table td:first-child { text-align: left; }
+.stats-table th { color: var(--muted); font-weight: normal; }
+#history-list { list-style: none; margin: 0; padding: 0; max-height: 360px; overflow-y: auto; }
+#history-list li { padding: 6px 0; border-bottom: 1px solid var(--panel-edge); }
+.history-meta { display: block; color: var(--muted); font-size: 0.8rem; margin-bottom: 2px; }
+#history-list .item.has-img { max-width: 90px; font-size: 0.7rem; }
+#history-list .item img { height: 40px; }
+
 /* 결과 팝업 */
 dialog { background: var(--panel); color: var(--text); border: 2px solid var(--gold); border-radius: 14px; min-width: min(90vw, 340px); text-align: center; }
 dialog::backdrop { background: rgba(5, 8, 25, 0.75); }

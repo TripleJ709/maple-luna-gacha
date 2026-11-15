@@ -17,6 +17,8 @@
       wonderBerry: 0,   // 보유 원더베리 수
       lunaCrystal: 0,   // 보유 루나 크리스탈 수
       inventory: {},    // 아이템 id -> 개수
+      stats: { draw: {}, sweet: {}, dream: {} }, // 출처별 결과 아이템 id -> 획득 횟수
+      history: [],      // 최근 기록(최신이 앞). { time, source, ids }
       pending: null     // 확인 대기 중인 결과 { title, ids }. 확인 전에는 인벤토리에 반영되지 않는다.
     };
   }
@@ -52,6 +54,17 @@
     state.inventory[id] = (state.inventory[id] || 0) + (n || 1);
   }
 
+  var HISTORY_LIMIT = 50;
+
+  // 통계와 기록에 남긴다. source: 'draw' | 'sweet' | 'dream'
+  function recordResult(state, source, items) {
+    items.forEach(function (it) {
+      state.stats[source][it.id] = (state.stats[source][it.id] || 0) + 1;
+    });
+    state.history.unshift({ time: Date.now(), source: source, ids: items.map(function (it) { return it.id; }) });
+    if (state.history.length > HISTORY_LIMIT) state.history.length = HISTORY_LIMIT;
+  }
+
   var PENDING_ERROR = '이전 결과를 먼저 확인해 주세요.';
 
   // 결과를 인벤토리에 바로 넣지 않고 확인 대기 상태로 둔다.
@@ -79,6 +92,7 @@
       results.push(Gacha.rollWonderBerry(rng));
     }
     setPending(state, '뽑기 결과', results);
+    recordResult(state, 'draw', results);
     return { ok: true, results: results };
   }
 
@@ -115,6 +129,7 @@
     state.lunaCrystal -= 1;
     var item = Gacha.rollSweet(rng);
     setPending(state, '스윗 합성 결과', [item]);
+    recordResult(state, 'sweet', [item]);
     return { ok: true, result: item };
   }
 
@@ -133,6 +148,7 @@
     state.lunaCrystal -= 1;
     var item = Gacha.rollDream(Data.ITEM_INDEX[sweetId].name, rng);
     setPending(state, '드림 합성 결과', [item]);
+    recordResult(state, 'dream', [item]);
     return { ok: true, result: item };
   }
 
@@ -147,6 +163,20 @@
       Object.keys(raw.inventory).forEach(function (id) {
         var n = raw.inventory[id];
         if (Number.isInteger(n) && n > 0) base.inventory[id] = n;
+      });
+    }
+    ['draw', 'sweet', 'dream'].forEach(function (src) {
+      var st = raw.stats && raw.stats[src];
+      if (!st || typeof st !== 'object') return;
+      Object.keys(st).forEach(function (id) {
+        if (Object.prototype.hasOwnProperty.call(Data.ITEM_INDEX, id) && Number.isInteger(st[id]) && st[id] > 0) base.stats[src][id] = st[id];
+      });
+    });
+    if (Array.isArray(raw.history)) {
+      raw.history.slice(0, HISTORY_LIMIT).forEach(function (h) {
+        if (!h || !Number.isFinite(h.time) || !base.stats.hasOwnProperty(h.source) || !Array.isArray(h.ids)) return;
+        var ids = h.ids.filter(function (id) { return Object.prototype.hasOwnProperty.call(Data.ITEM_INDEX, id); });
+        if (ids.length) base.history.push({ time: h.time, source: h.source, ids: ids });
       });
     }
     var pend = raw.pending;
@@ -181,6 +211,7 @@
     purchase: purchase,
     addItem: addItem,
     confirmPending: confirmPending,
+    HISTORY_LIMIT: HISTORY_LIMIT,
     drawWonderBerry: drawWonderBerry,
     hasItems: hasItems,
     removeItems: removeItems,
