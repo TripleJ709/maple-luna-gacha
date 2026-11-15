@@ -48,7 +48,7 @@
     '아쿠엘': 'assets/anim/aquel.webp',
     '윈디르': 'assets/anim/windir.webp',
     '카투': 'assets/anim/katu.webp',
-    '카티엘': 'assets/anim/katiel.gif',
+    '카티엘': 'assets/anim/katiel.webp',
     '파라키': 'assets/anim/paraki.webp',
     '쿠키베어': 'assets/anim/cookie-bear.webp',
     '뚠냥': 'assets/anim/ttunnyang.webp',
