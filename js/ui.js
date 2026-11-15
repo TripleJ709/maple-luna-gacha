@@ -44,16 +44,36 @@
     { title: '펫장비', kinds: [K.KEY] }
   ];
 
-  // 아이템 한 개를 이름 카드로 만든다. 이미지가 지정되면 이미지를, 없으면 텍스트를 쓴다.
-  function itemLabel(item, count) {
+  // 이미지/영상 요소를 만든다. mp4는 소리 없이 반복 재생하고, 그 외(png, gif, webp)는 img로 표시한다.
+  function mediaElement(src, animated) {
+    var el;
+    if (/\.mp4$/i.test(src)) {
+      el = document.createElement('video');
+      el.src = src;
+      el.autoplay = true;
+      el.loop = true;
+      el.muted = true;
+      el.setAttribute('playsinline', '');
+      el.setAttribute('aria-hidden', 'true');
+    } else {
+      el = document.createElement('img');
+      el.src = src;
+      el.alt = '';
+    }
+    if (animated) el.className = 'sprite';
+    return el;
+  }
+
+  // 아이템 한 개를 이름 카드로 만든다.
+  // preferAnim=true(결과 팝업)이면 움직이는 펫(anim)을 우선, 아니면 정지 이미지(image)를 우선한다.
+  // 어느 쪽도 없으면 텍스트만 표시한다.
+  function itemLabel(item, count, preferAnim) {
     var span = document.createElement('span');
     span.className = 'item grade-' + item.grade;
-    if (item.image) {
-      var img = document.createElement('img');
-      img.src = item.image;
-      img.alt = '';
+    var src = preferAnim ? (item.anim || item.image) : (item.image || item.anim);
+    if (src) {
       span.classList.add('has-img');
-      span.appendChild(img);
+      span.appendChild(mediaElement(src, src === item.anim));
     }
     span.appendChild(document.createTextNode(item.name + (count ? ' x' + count : '')));
     return span;
@@ -111,7 +131,7 @@
     els.resultList.textContent = '';
     items.forEach(function (it) {
       var li = document.createElement('li');
-      li.appendChild(itemLabel(it));
+      li.appendChild(itemLabel(it, 0, true));
       els.resultList.appendChild(li);
     });
     els.dialog.showModal();
