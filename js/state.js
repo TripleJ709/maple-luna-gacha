@@ -159,57 +159,58 @@
   }
 
   /*
-   * 합성 창(재료 칸) 규칙. 각 칸은 넣을 수 있는 아이템 종류(kind)가 정해져 있다.
-   * 스윗: 원더 블랙 2칸 / 드림: 스윗 펫 1칸 + 원더 블랙 1칸 (공식 규칙).
+   * 합성 창(재료 2칸) 규칙. 칸 순서는 상관없고, 조합으로 합성 종류가 정해진다.
+   *  - 원더 블랙 + 원더 블랙 -> 스윗 합성
+   *  - 루나 스윗 펫 + 원더 블랙 -> 드림 합성
+   *  - 루나 스윗 펫 + 루나 스윗 펫 -> 불가
    */
-  var SYNTH_MODES = {
-    sweet: {
-      label: '루나 크리스탈 스윗',
-      slots: [
-        { label: '원더 블랙 펫', kind: Data.KIND.WONDER_BLACK },
-        { label: '원더 블랙 펫', kind: Data.KIND.WONDER_BLACK }
-      ]
-    },
-    dream: {
-      label: '루나 크리스탈 드림',
-      slots: [
-        { label: '루나 스윗 펫', kind: Data.KIND.SWEET_PET },
-        { label: '원더 블랙 펫', kind: Data.KIND.WONDER_BLACK }
-      ]
-    }
-  };
+  function kindOf(id) {
+    var it = Data.ITEM_INDEX[id];
+    return it ? it.kind : null;
+  }
 
-  // selected: 칸별 선택된 아이템 id (비어 있으면 null). 아이템이 들어갈 수 있는 첫 빈 칸의 번호, 없으면 -1.
-  function firstOpenSlot(mode, selected, id) {
-    var item = Data.ITEM_INDEX[id];
-    if (!item) return -1;
-    var slots = SYNTH_MODES[mode].slots;
-    for (var i = 0; i < slots.length; i++) {
-      if (!selected[i] && slots[i].kind === item.kind) return i;
-    }
+  // 두 재료의 합성 종류: 'sweet' | 'dream' | null(불가)
+  function synthModeOf(idA, idB) {
+    var a = kindOf(idA), b = kindOf(idB);
+    var BLACK = Data.KIND.WONDER_BLACK, SWEET = Data.KIND.SWEET_PET;
+    if (a === BLACK && b === BLACK) return 'sweet';
+    if ((a === SWEET && b === BLACK) || (a === BLACK && b === SWEET)) return 'dream';
+    return null;
+  }
+
+  // selected: 칸별 선택된 아이템 id (비어 있으면 null). 첫 빈 칸의 번호, 없으면 -1.
+  function firstOpenSlot(selected) {
+    for (var i = 0; i < selected.length; i++) if (!selected[i]) return i;
     return -1;
   }
 
-  // 이 아이템을 지금 선택할 수 있는가: 들어갈 빈 칸이 있고, 보유 수량이 남아 있어야 한다.
-  function canSelect(state, mode, selected, id) {
-    if (firstOpenSlot(mode, selected, id) === -1) return false;
+  // 이 아이템을 지금 선택할 수 있는가: 원더 블랙/스윗 펫이어야 하고, 빈 칸과 보유 수량이 있어야 하며,
+  // 이미 고른 재료와 합성이 가능한 조합이어야 한다.
+  function canSelect(state, selected, id) {
+    var kind = kindOf(id);
+    if (kind !== Data.KIND.WONDER_BLACK && kind !== Data.KIND.SWEET_PET) return false;
+    if (firstOpenSlot(selected) === -1) return false;
     var used = selected.filter(function (x) { return x === id; }).length;
-    return (state.inventory[id] || 0) > used;
+    if ((state.inventory[id] || 0) <= used) return false;
+    var other = selected.filter(Boolean)[0];
+    return other ? synthModeOf(other, id) !== null : true;
   }
 
   // 칸이 모두 찼을 때 합성을 실행한다. (루나 크리스탈 1개는 이때 소모된다)
-  function runSynthesis(state, mode, selected, rng) {
-    if (selected.length !== SYNTH_MODES[mode].slots.length || selected.some(function (x) { return !x; })) {
-      return { ok: false, error: '재료를 모두 넣어 주세요.' };
+  // 반환: { ok, result, mode } 또는 { ok:false, error }
+  function runSynthesis(state, selected, rng) {
+    if (selected.length !== 2 || !selected[0] || !selected[1]) return { ok: false, error: '재료를 모두 넣어 주세요.' };
+    var mode = synthModeOf(selected[0], selected[1]);
+    if (!mode) return { ok: false, error: '이 재료로는 합성할 수 없습니다.' };
+    var r;
+    if (mode === 'sweet') {
+      r = synthesizeSweet(state, selected[0], selected[1], rng);
+    } else {
+      var sweetId = kindOf(selected[0]) === Data.KIND.SWEET_PET ? selected[0] : selected[1];
+      var blackId = sweetId === selected[0] ? selected[1] : selected[0];
+      r = synthesizeDream(state, sweetId, blackId, rng);
     }
-    // 칸 종류와 맞지 않는 아이템은 합성 함수가 걸러내지만, 칸 순서(스윗 펫 → 원더 블랙)는 여기서 보장한다.
-    for (var i = 0; i < selected.length; i++) {
-      var it = Data.ITEM_INDEX[selected[i]];
-      if (!it || it.kind !== SYNTH_MODES[mode].slots[i].kind) return { ok: false, error: '넣을 수 없는 재료입니다.' };
-    }
-    return mode === 'sweet'
-      ? synthesizeSweet(state, selected[0], selected[1], rng)
-      : synthesizeDream(state, selected[0], selected[1], rng);
+    return r.ok ? { ok: true, result: r.result, mode: mode } : r;
   }
 
   // 저장된 값이 깨졌거나 형식이 달라도 기본값으로 안전하게 복구한다.
@@ -278,7 +279,7 @@
     removeItems: removeItems,
     synthesizeSweet: synthesizeSweet,
     synthesizeDream: synthesizeDream,
-    SYNTH_MODES: SYNTH_MODES,
+    synthModeOf: synthModeOf,
     firstOpenSlot: firstOpenSlot,
     canSelect: canSelect,
     runSynthesis: runSynthesis,

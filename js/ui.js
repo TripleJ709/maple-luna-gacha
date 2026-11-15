@@ -14,8 +14,8 @@
     dialog: document.getElementById('result-dialog'),
     resultList: document.getElementById('result-list'),
     resultTitle: document.getElementById('result-title'),
-    openSweet: document.getElementById('open-sweet'),
-    openDream: document.getElementById('open-dream'),
+    openLuna: document.getElementById('open-luna'),
+    synthPreview: document.getElementById('synth-preview'),
     synthDialog: document.getElementById('synth-dialog'),
     synthTitle: document.getElementById('synth-title'),
     synthInfo: document.getElementById('synth-info'),
@@ -103,59 +103,108 @@
   }
 
   // ---- 합성 창: 루나 크리스탈 사용하기 → 재료 칸에 펫을 넣고 합성 ----
-  var synthMode = null;     // 'sweet' | 'dream'
-  var synthSelected = [];   // 칸별 선택된 아이템 id (비어 있으면 null)
-  var SYNTH_RESULT_TITLE = { sweet: '스윗 합성 결과', dream: '드림 합성 결과' };
+  // 버튼은 하나이고, 넣은 재료의 조합으로 스윗/드림 합성이 정해진다.
+  var synthSelected = [null, null]; // 칸별 선택된 아이템 id (비어 있으면 null)
+  var SYNTH_LABEL = { sweet: '스윗 합성', dream: '드림 합성' };
+  var SYNTH_NOTE = { dream: '재료로 쓴 스윗 펫과 같은 종류의 드림 펫은 나오지 않습니다.' };
 
-  function openSynth(mode) {
+  function openSynth() {
     if (state.pending) { showMessage('이전 결과를 먼저 확인해 주세요.'); return; }
     if (state.lunaCrystal < 1) { showMessage('루나 크리스탈이 부족합니다. 캐시샵에서 구매해 주세요.'); return; }
-    synthMode = mode;
-    synthSelected = GameState.SYNTH_MODES[mode].slots.map(function () { return null; });
+    synthSelected = [null, null];
     renderSynth();
     els.synthDialog.showModal();
   }
 
+  // 합성 종류별 공식 확률(등급 묶음 합계)을 한 줄로 보여준다.
+  function previewBlock(mode) {
+    var rows = GameStats.summarize(GameState.createState(), mode).rows;
+    var box = document.createElement('div');
+    box.className = 'preview-block';
+    var head = document.createElement('strong');
+    head.textContent = SYNTH_LABEL[mode];
+    box.appendChild(head);
+    var line = document.createElement('span');
+    line.textContent = rows.map(function (r) { return r.label + ' ' + pct(r.official); }).join(' · ');
+    box.appendChild(line);
+    if (SYNTH_NOTE[mode]) {
+      var note = document.createElement('small');
+      note.textContent = SYNTH_NOTE[mode];
+      box.appendChild(note);
+    }
+    return box;
+  }
+
+  // 먼저 넣은 재료에 따라 가능한 합성과 루나 쁘띠 확률이 달라진다.
+  function renderPreview() {
+    els.synthPreview.textContent = '';
+    var chosen = synthSelected.filter(Boolean);
+    var p = document.createElement('p');
+    p.className = 'desc';
+    if (!chosen.length) {
+      p.textContent = '원더 블랙 또는 루나 스윗 펫을 넣어 주세요.';
+      els.synthPreview.appendChild(p);
+      return;
+    }
+    if (chosen.length === 2) {
+      els.synthPreview.appendChild(previewBlock(GameState.synthModeOf(chosen[0], chosen[1])));
+      return;
+    }
+    var first = GachaData.ITEM_INDEX[chosen[0]];
+    if (first.kind === GachaData.KIND.SWEET_PET) {
+      p.textContent = '원더 블랙을 하나 더 넣으면 드림 합성이 됩니다.';
+      els.synthPreview.appendChild(p);
+      els.synthPreview.appendChild(previewBlock('dream'));
+    } else {
+      p.textContent = '두 번째 재료에 따라 합성이 달라집니다.';
+      els.synthPreview.appendChild(p);
+      els.synthPreview.appendChild(previewBlock('sweet'));
+      els.synthPreview.appendChild(previewBlock('dream'));
+    }
+  }
+
   function renderSynth() {
-    var def = GameState.SYNTH_MODES[synthMode];
-    els.synthTitle.textContent = def.label;
+    els.synthTitle.textContent = '루나 크리스탈';
     els.synthInfo.textContent = '루나 크리스탈 1개가 사용됩니다. (보유 ' + state.lunaCrystal + '개)';
     els.synthError.textContent = '';
 
     // 재료 칸: 넣은 펫을 누르면 빼낸다.
     els.synthSlots.textContent = '';
-    def.slots.forEach(function (slot, i) {
+    synthSelected.forEach(function (id, i) {
       var btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'slot' + (synthSelected[i] ? ' filled' : '');
-      if (synthSelected[i]) {
-        btn.appendChild(itemLabel(GachaData.ITEM_INDEX[synthSelected[i]]));
+      btn.className = 'slot' + (id ? ' filled' : '');
+      if (id) {
+        btn.appendChild(itemLabel(GachaData.ITEM_INDEX[id]));
         btn.title = '눌러서 빼기';
         btn.addEventListener('click', function () { synthSelected[i] = null; renderSynth(); });
       } else {
-        btn.textContent = slot.label + ' 넣기';
+        btn.textContent = '재료 ' + (i + 1);
         btn.disabled = true;
       }
       els.synthSlots.appendChild(btn);
     });
 
-    // 인벤토리: 보유한 아이템을 모두 보여주고, 지금 넣을 수 없는 것은 비활성화한다.
+    renderPreview();
+
+    // 재료 목록: 보유한 원더 블랙과 루나 스윗 펫만 보여주고, 지금 조합이 안 되는 것은 회색으로 막는다.
     els.synthPicker.textContent = '';
     var any = false;
+    var usable = [GachaData.KIND.WONDER_BLACK, GachaData.KIND.SWEET_PET];
     INVENTORY_GROUPS.forEach(function (group) {
       Object.keys(state.inventory)
         .map(function (id) { return GachaData.ITEM_INDEX[id]; })
-        .filter(function (it) { return it && group.kinds.indexOf(it.kind) !== -1; })
+        .filter(function (it) { return it && group.kinds.indexOf(it.kind) !== -1 && usable.indexOf(it.kind) !== -1; })
         .forEach(function (it) {
           any = true;
           var used = synthSelected.filter(function (x) { return x === it.id; }).length;
           var btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'pick';
-          btn.disabled = !GameState.canSelect(state, synthMode, synthSelected, it.id);
+          btn.disabled = !GameState.canSelect(state, synthSelected, it.id);
           btn.appendChild(itemLabel(it, state.inventory[it.id] - used));
           btn.addEventListener('click', function () {
-            var idx = GameState.firstOpenSlot(synthMode, synthSelected, it.id);
+            var idx = GameState.firstOpenSlot(synthSelected);
             if (idx === -1) return;
             synthSelected[idx] = it.id;
             renderSynth();
@@ -163,21 +212,20 @@
           els.synthPicker.appendChild(btn);
         });
     });
-    if (!any) els.synthPicker.textContent = '인벤토리가 비어 있습니다.';
+    if (!any) els.synthPicker.textContent = '합성에 쓸 수 있는 펫(원더 블랙, 루나 스윗 펫)이 없습니다.';
 
     els.synthRun.disabled = synthSelected.some(function (x) { return !x; });
   }
 
-  els.openSweet.addEventListener('click', function () { openSynth('sweet'); });
-  els.openDream.addEventListener('click', function () { openSynth('dream'); });
+  els.openLuna.addEventListener('click', openSynth);
   els.synthCancel.addEventListener('click', function () { els.synthDialog.close(); });
   els.synthRun.addEventListener('click', function () {
-    var result = GameState.runSynthesis(state, synthMode, synthSelected);
+    var result = GameState.runSynthesis(state, synthSelected);
     if (!result.ok) { els.synthError.textContent = result.error; return; }
     els.synthDialog.close();
     showMessage('');
     commit();
-    showResults(SYNTH_RESULT_TITLE[synthMode], [result.result]);
+    showResults(SYNTH_LABEL[result.mode] + ' 결과', [result.result]);
   });
 
   // 희귀(등급 rare: 원더 블랙, 루나 쁘띠)가 나오면 팝업을 특별하게 연출한다.

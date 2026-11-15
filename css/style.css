@@ -101,6 +101,11 @@ button.danger { background: #4a1f2e; border-color: #a34a63; color: #ffc9d6; }
 .pick { padding: 2px; background: transparent; border: 0; }
 .pick:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(0.8); }
 .pick:disabled:hover { filter: grayscale(0.8); }
+#synth-preview { margin: 4px 0 12px; }
+.preview-block { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; margin-bottom: 6px; border: 1px solid var(--panel-edge); border-radius: 8px; background: rgba(0, 0, 0, 0.2); font-size: 0.85rem; }
+.preview-block strong { color: var(--gold); }
+.preview-block small { color: var(--muted); }
+.rules { margin: 0 0 8px; padding-left: 20px; }
 #synth-error { min-height: 1.2em; color: #ffb3b3; margin: 8px 0 0; text-align: center; }
 #synth-dialog .item img { height: 64px; }
 #synth-dialog .item .sprite { width: 64px; height: 64px; }
