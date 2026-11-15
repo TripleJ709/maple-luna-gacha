@@ -16,7 +16,8 @@
       totalSpent: 0,    // 누적 사용 금액(구매에 쓴 금액, 충전액 제외)
       wonderBerry: 0,   // 보유 원더베리 수
       lunaCrystal: 0,   // 보유 루나 크리스탈 수
-      inventory: {}     // 아이템 id -> 개수
+      inventory: {},    // 아이템 id -> 개수
+      pending: null     // 확인 대기 중인 결과 { title, ids }. 확인 전에는 인벤토리에 반영되지 않는다.
     };
   }
 
@@ -51,17 +52,33 @@
     state.inventory[id] = (state.inventory[id] || 0) + (n || 1);
   }
 
+  var PENDING_ERROR = '이전 결과를 먼저 확인해 주세요.';
+
+  // 결과를 인벤토리에 바로 넣지 않고 확인 대기 상태로 둔다.
+  function setPending(state, title, items) {
+    state.pending = { title: title, ids: items.map(function (it) { return it.id; }) };
+  }
+
+  // 확인: 대기 중인 결과를 인벤토리에 반영한다. 대기 결과가 없으면 아무 일도 하지 않는다.
+  function confirmPending(state) {
+    if (!state.pending) return { ok: false, items: [] };
+    var items = state.pending.ids.map(function (id) { return Data.ITEM_INDEX[id]; });
+    state.pending.ids.forEach(function (id) { addItem(state, id, 1); });
+    state.pending = null;
+    return { ok: true, items: items };
+  }
+
   // 원더베리 뽑기: 1회=원더베리 1개, 5회=5개. 부족하면 아무것도 바꾸지 않는다.
   function drawWonderBerry(state, count, rng) {
     if (count !== 1 && count !== 5) return { ok: false, error: '뽑기는 1회 또는 5회만 가능합니다.' };
+    if (state.pending) return { ok: false, error: PENDING_ERROR };
     if (state.wonderBerry < count) return { ok: false, error: '원더베리가 부족합니다.' };
     state.wonderBerry -= count;
     var results = [];
     for (var i = 0; i < count; i++) {
-      var item = Gacha.rollWonderBerry(rng);
-      addItem(state, item.id, 1);
-      results.push(item);
+      results.push(Gacha.rollWonderBerry(rng));
     }
+    setPending(state, '뽑기 결과', results);
     return { ok: true, results: results };
   }
 
@@ -88,6 +105,7 @@
     if (!isKind(idA, Data.KIND.WONDER_BLACK) || !isKind(idB, Data.KIND.WONDER_BLACK)) {
       return { ok: false, error: '원더 블랙 펫 2개를 선택해야 합니다.' };
     }
+    if (state.pending) return { ok: false, error: PENDING_ERROR };
     var needs = {};
     needs[idA] = (needs[idA] || 0) + 1;
     needs[idB] = (needs[idB] || 0) + 1;
@@ -96,7 +114,7 @@
     removeItems(state, needs);
     state.lunaCrystal -= 1;
     var item = Gacha.rollSweet(rng);
-    addItem(state, item.id, 1);
+    setPending(state, '스윗 합성 결과', [item]);
     return { ok: true, result: item };
   }
 
@@ -105,6 +123,7 @@
   function synthesizeDream(state, sweetId, blackId, rng) {
     if (!isKind(sweetId, Data.KIND.SWEET_PET)) return { ok: false, error: '루나 스윗 펫을 선택해야 합니다.' };
     if (!isKind(blackId, Data.KIND.WONDER_BLACK)) return { ok: false, error: '원더 블랙 펫을 선택해야 합니다.' };
+    if (state.pending) return { ok: false, error: PENDING_ERROR };
     var needs = {};
     needs[sweetId] = 1;
     needs[blackId] = 1;
@@ -113,7 +132,7 @@
     removeItems(state, needs);
     state.lunaCrystal -= 1;
     var item = Gacha.rollDream(Data.ITEM_INDEX[sweetId].name, rng);
-    addItem(state, item.id, 1);
+    setPending(state, '드림 합성 결과', [item]);
     return { ok: true, result: item };
   }
 
@@ -129,6 +148,11 @@
         var n = raw.inventory[id];
         if (Number.isInteger(n) && n > 0) base.inventory[id] = n;
       });
+    }
+    var pend = raw.pending;
+    if (pend && typeof pend.title === 'string' && Array.isArray(pend.ids)) {
+      var ids = pend.ids.filter(function (id) { return Object.prototype.hasOwnProperty.call(Data.ITEM_INDEX, id); });
+      if (ids.length) base.pending = { title: pend.title, ids: ids };
     }
     return base;
   }
@@ -156,6 +180,7 @@
     PRODUCTS: PRODUCTS,
     purchase: purchase,
     addItem: addItem,
+    confirmPending: confirmPending,
     drawWonderBerry: drawWonderBerry,
     hasItems: hasItems,
     removeItems: removeItems,

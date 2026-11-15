@@ -175,6 +175,16 @@
   });
   els.resultClose.addEventListener('click', function () { els.dialog.close(); });
 
+  // 팝업이 닫히면(확인 버튼, Esc 모두) 대기 중인 결과를 인벤토리에 반영한다.
+  els.dialog.addEventListener('close', function () {
+    if (GameState.confirmPending(state).ok) commit();
+  });
+
+  // 확인하지 않고 새로고침한 경우: 대기 중인 결과를 다시 보여준다.
+  if (state.pending) {
+    showResults(state.pending.title, state.pending.ids.map(function (id) { return GachaData.ITEM_INDEX[id]; }));
+  }
+
   // 탭 전환: 선택한 탭의 화면만 보이게 한다.
   var tabButtons = document.querySelectorAll('.tab');
   function selectTab(name) {
