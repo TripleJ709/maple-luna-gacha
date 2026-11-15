@@ -20,7 +20,9 @@
     dreamSweet: document.getElementById('dream-sweet'),
     dreamBlack: document.getElementById('dream-black'),
     dreamBtn: document.getElementById('dream-btn'),
-    resultClose: document.getElementById('result-close')
+    resultClose: document.getElementById('result-close'),
+    statsList: document.getElementById('stats-list'),
+    historyList: document.getElementById('history-list')
   };
 
   function won(n) { return n.toLocaleString('ko-KR') + '원'; }
@@ -109,7 +111,53 @@
     els.dialog.showModal();
   }
 
+  function pct(n) { return (Math.round(n * 100) / 100).toFixed(2) + '%'; }
+
+  function renderStats() {
+    els.statsList.textContent = '';
+    Object.keys(GameStats.SOURCES).forEach(function (src) {
+      var sum = GameStats.summarize(state, src);
+      var box = document.createElement('div');
+      var h = document.createElement('h3');
+      h.textContent = GameStats.SOURCES[src].label + ' - 총 ' + sum.total + '회';
+      box.appendChild(h);
+      var table = document.createElement('table');
+      table.className = 'stats-table';
+      var head = table.insertRow();
+      ['구분', '횟수', '실제', '공식'].forEach(function (t) {
+        var th = document.createElement('th');
+        th.textContent = t;
+        head.appendChild(th);
+      });
+      sum.rows.forEach(function (r) {
+        var tr = table.insertRow();
+        [r.label, r.count + '회', sum.total ? pct(r.actual) : '-', pct(r.official)].forEach(function (t) {
+          tr.insertCell().textContent = t;
+        });
+      });
+      box.appendChild(table);
+      els.statsList.appendChild(box);
+    });
+
+    els.historyList.textContent = '';
+    if (!state.history.length) {
+      var empty = document.createElement('li');
+      empty.textContent = '아직 기록이 없습니다.';
+      els.historyList.appendChild(empty);
+    }
+    state.history.forEach(function (h) {
+      var li = document.createElement('li');
+      var meta = document.createElement('span');
+      meta.className = 'history-meta';
+      meta.textContent = new Date(h.time).toLocaleTimeString('ko-KR') + ' · ' + GameStats.SOURCES[h.source].label;
+      li.appendChild(meta);
+      h.ids.forEach(function (id) { li.appendChild(itemLabel(GachaData.ITEM_INDEX[id])); });
+      els.historyList.appendChild(li);
+    });
+  }
+
   function render() {
+    renderStats();
     renderInventory();
     renderSynthesisOptions();
     els.cash.textContent = won(state.cash);
