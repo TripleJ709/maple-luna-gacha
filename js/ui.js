@@ -158,8 +158,6 @@
       var rare = it.grade === GachaData.GRADE.RARE;
       if (rare) {
         li.className = 'rare-card';
-        // 여러 개를 뽑았을 때는 일반 카드가 모두 나온 뒤 마지막에 등장시킨다.
-        li.style.animationDelay = (items.length > 1 ? 0.9 : 0.3) + 's';
       }
       li.appendChild(itemLabel(it, 0, true));
       els.resultList.appendChild(li);
