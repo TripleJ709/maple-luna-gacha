@@ -90,6 +90,22 @@ button.danger { background: #4a1f2e; border-color: #a34a63; color: #ffc9d6; }
 #history-list .item.has-img { max-width: 90px; font-size: 0.7rem; }
 #history-list .item img, #history-list .item video { height: 40px; }
 
+/* 합성 창: 재료 칸과 인벤토리 선택 */
+#synth-dialog { width: min(92vw, 560px); text-align: left; }
+#synth-dialog .row { justify-content: center; }
+.slots { display: flex; gap: 10px; justify-content: center; margin: 8px 0 14px; }
+.slot { min-width: 120px; min-height: 110px; justify-content: center; border: 2px dashed var(--panel-edge); background: rgba(0, 0, 0, 0.25); color: var(--muted); }
+.slot.filled { border-style: solid; border-color: var(--gold); color: var(--text); }
+.slot:disabled { opacity: 1; cursor: default; }
+#synth-picker { display: flex; flex-wrap: wrap; gap: 6px; max-height: 260px; overflow-y: auto; padding: 2px; }
+.pick { padding: 2px; background: transparent; border: 0; }
+.pick:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(0.8); }
+.pick:disabled:hover { filter: grayscale(0.8); }
+#synth-error { min-height: 1.2em; color: #ffb3b3; margin: 8px 0 0; text-align: center; }
+#synth-dialog .item img { height: 64px; }
+#synth-dialog .item .sprite { width: 64px; height: 64px; }
+#synth-dialog .item.has-img { max-width: 110px; font-size: 0.8rem; }
+
 /* 결과 팝업 */
 dialog { background: var(--panel); color: var(--text); border: 2px solid var(--gold); border-radius: 14px; min-width: min(90vw, 340px); text-align: center; }
 dialog::backdrop { background: rgba(5, 8, 25, 0.75); }
