@@ -126,14 +126,51 @@
     fillOptions(els.dreamSweet, GachaData.SWEET_TABLE, GachaData.KIND.SWEET_PET, '스윗 펫 없음');
   }
 
+  // 희귀(등급 rare: 원더 블랙, 루나 쁘띠)가 나오면 팝업을 특별하게 연출한다.
+  var SPARKLE_COUNT = 16;
+
+  function clearSparkles() {
+    Array.prototype.forEach.call(els.dialog.querySelectorAll('.spark'), function (n) { n.remove(); });
+  }
+
+  function addSparkles() {
+    for (var i = 0; i < SPARKLE_COUNT; i++) {
+      var sp = document.createElement('span');
+      sp.className = 'spark';
+      sp.textContent = i % 3 === 0 ? '✦' : '✧';
+      sp.style.left = (4 + Math.random() * 92) + '%';
+      sp.style.top = (4 + Math.random() * 92) + '%';
+      sp.style.animationDelay = (Math.random() * 1.6).toFixed(2) + 's';
+      sp.style.fontSize = (12 + Math.random() * 16).toFixed(0) + 'px';
+      els.dialog.appendChild(sp);
+    }
+  }
+
+  function rareTitle(rareItems, fallback) {
+    var petit = rareItems.filter(function (it) { return it.kind === GachaData.KIND.PETIT; })[0];
+    if (petit) return '🌙 루나 쁘띠 획득! 🌙';
+    return '✨ 희귀 원더 블랙 획득! ✨';
+  }
+
   function showResults(title, items) {
-    els.resultTitle.textContent = title;
+    var rareItems = items.filter(function (it) { return it.grade === GachaData.GRADE.RARE; });
+    var isRare = rareItems.length > 0;
+    clearSparkles();
+    els.dialog.classList.toggle('rare-result', isRare);
+    els.resultTitle.textContent = isRare ? rareTitle(rareItems, title) : title;
     els.resultList.textContent = '';
     items.forEach(function (it) {
       var li = document.createElement('li');
+      var rare = it.grade === GachaData.GRADE.RARE;
+      if (rare) {
+        li.className = 'rare-card';
+        // 여러 개를 뽑았을 때는 일반 카드가 모두 나온 뒤 마지막에 등장시킨다.
+        li.style.animationDelay = (items.length > 1 ? 0.9 : 0.3) + 's';
+      }
       li.appendChild(itemLabel(it, 0, true));
       els.resultList.appendChild(li);
     });
+    if (isRare) addSparkles();
     els.dialog.showModal();
   }
 
