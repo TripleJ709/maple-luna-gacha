@@ -278,3 +278,25 @@ test('대기 결과는 저장/복구되어 새로고침 후에도 유지, 깨진
   assert.deepEqual(S.load(memoryStorage(bad)).pending, { title: 't', ids: ['key'] });
   assert.equal(S.load(memoryStorage(JSON.stringify({ pending: { title: 't', ids: ['nope'] } }))).pending, null);
 });
+
+test('초기화: 모든 필드(캐시, 인벤토리, 통계, 기록, 대기 결과)가 처음 상태로 돌아감', () => {
+  const s = S.createState();
+  S.charge(s, 100000);
+  S.purchase(s, 'wonderBerry11');
+  S.purchase(s, 'lunaCrystal1');
+  S.drawWonderBerry(s, 5);
+  const keysBefore = Object.keys(S.createState()).sort();
+  S.reset(s);
+  assert.deepEqual(s, S.createState());
+  assert.deepEqual(Object.keys(s).sort(), keysBefore);
+});
+
+test('초기화 후 저장하면 다시 불러와도 처음 상태', () => {
+  const st = memoryStorage();
+  const s = S.createState();
+  S.charge(s, 50000);
+  S.save(st, s);
+  S.reset(s);
+  S.save(st, s);
+  assert.deepEqual(S.load(st), S.createState());
+});

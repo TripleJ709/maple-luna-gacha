@@ -71,6 +71,9 @@ dialog .item img { height: 96px; }
 #auto-result p { margin: 6px 0; }
 #auto-result p:first-child { color: var(--gold); font-weight: bold; }
 
+.footer { max-width: 1100px; margin: 18px auto 6px; text-align: center; }
+button.danger { background: #4a1f2e; border-color: #a34a63; color: #ffc9d6; }
+
 /* 통계 표와 기록 */
 .stats-table { width: 100%; border-collapse: collapse; margin-bottom: 6px; font-size: 0.9rem; }
 .stats-table th, .stats-table td { padding: 5px 8px; border-bottom: 1px solid var(--panel-edge); text-align: right; }

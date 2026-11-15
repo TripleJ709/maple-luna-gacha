@@ -152,6 +152,12 @@
     return { ok: true, result: item };
   }
 
+  // 초기화: createState()의 값으로 모든 필드를 되돌린다. (새 상태 필드를 추가해도 자동으로 포함된다)
+  function reset(state) {
+    Object.keys(state).forEach(function (k) { delete state[k]; });
+    Object.assign(state, createState());
+  }
+
   // 저장된 값이 깨졌거나 형식이 달라도 기본값으로 안전하게 복구한다.
   function sanitize(raw) {
     var base = createState();
@@ -207,6 +213,7 @@
     CHARGE_UNIT: CHARGE_UNIT,
     createState: createState,
     charge: charge,
+    reset: reset,
     PRODUCTS: PRODUCTS,
     purchase: purchase,
     addItem: addItem,
