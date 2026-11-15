@@ -46,7 +46,7 @@ test('저장 데이터가 없거나 깨져 있으면 기본 상태로 복구', (
 test('원더베리 1개 구매: 캐시 5,400원 감소, 누적 사용 금액 5,400원 증가', () => {
   const s = S.createState();
   S.charge(s, 10000);
-  assert.deepEqual(S.purchase(s, 'wonderBerry1'), { ok: true });
+  assert.deepEqual(S.purchase(s, 'wonderBerry1'), { ok: true, totalPrice: 5400, itemAmount: 1 });
   assert.equal(s.cash, 4600);
   assert.equal(s.totalSpent, 5400);
   assert.equal(s.wonderBerry, 1);
@@ -392,25 +392,41 @@ test('페이백: 수량 부족/잘못된 수량은 거부하고 상태 불변', 
   assert.equal(JSON.stringify(s), before);
 });
 
-test('메이플포인트는 캐시와 똑같이 구매에 쓰이고, 포인트를 먼저 쓴 뒤 모자란 만큼 캐시를 씀', () => {
+test('결제 수단을 선택해 전액 결제하며 캐시와 메이플포인트를 섞지 않음', () => {
   const s = S.createState();
-  s.maplePoint = 540;
+  s.maplePoint = 5400;
   s.cash = 5000;
-  assert.equal(S.purchase(s, 'wonderBerry1').ok, true); // 5,400원
-  assert.equal(s.maplePoint, 0);
-  assert.equal(s.cash, 140);
-  assert.equal(s.totalSpent, 5400);
-  assert.equal(s.wonderBerry, 1);
+  assert.equal(S.purchase(s, 'wonderBerry1', 'cash').error, '캐시가 부족합니다.');
+  assert.deepEqual([s.maplePoint, s.cash], [5400, 5000]);
+  assert.equal(S.purchase(s, 'wonderBerry1', 'maplePoint').ok, true);
+  assert.deepEqual([s.maplePoint, s.cash, s.wonderBerry], [0, 5000, 1]);
 });
 
-test('메이플포인트만으로도 구매 가능, 합계가 모자라면 거부하고 불변', () => {
+test('구매 수량만큼 가격과 지급 수량을 곱해 계산', () => {
   const s = S.createState();
-  s.maplePoint = 3900;
-  assert.equal(S.purchase(s, 'lunaCrystal1').ok, true);
-  assert.deepEqual([s.maplePoint, s.cash, s.lunaCrystal], [0, 0, 1]);
-  s.maplePoint = 2000; s.cash = 3000;
+  s.cash = 200000;
+  const r = S.purchase(s, 'wonderBerry11', 'cash', 3);
+  assert.deepEqual(r, { ok: true, totalPrice: 162000, itemAmount: 33 });
+  assert.equal(s.cash, 38000);
+  assert.equal(s.wonderBerry, 33);
+  assert.equal(s.totalSpent, 162000);
+});
+
+test('구매 수량은 1~100 정수, 결제 수단은 캐시/메이플포인트만 허용', () => {
+  const s = S.createState();
+  s.cash = 1000000;
+  s.maplePoint = 1000000;
+  [0, -1, 1.5, 101, '2', NaN].forEach((q) => assert.equal(S.purchase(s, 'lunaCrystal1', 'cash', q).ok, false));
+  assert.equal(S.purchase(s, 'lunaCrystal1', 'mixed', 1).ok, false);
+  assert.deepEqual([s.cash, s.maplePoint, s.lunaCrystal], [1000000, 1000000, 0]);
+});
+
+test('선택한 결제 수단이 부족하면 다른 재화가 충분해도 거부', () => {
+  const s = S.createState();
+  s.maplePoint = 2000;
+  s.cash = 100000;
   const before = JSON.stringify(s);
-  assert.equal(S.purchase(s, 'wonderBerry1').error, '캐시가 부족합니다.'); // 합계 5,000 < 5,400
+  assert.equal(S.purchase(s, 'wonderBerry1', 'maplePoint').error, '메이플포인트가 부족합니다.');
   assert.equal(JSON.stringify(s), before);
 });
 

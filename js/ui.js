@@ -9,6 +9,17 @@
     totalSpent: document.getElementById('total-spent'),
     amount: document.getElementById('charge-amount'),
     chargeBtn: document.getElementById('charge-btn'),
+    purchaseDialog: document.getElementById('purchase-dialog'),
+    purchaseTitle: document.getElementById('purchase-title'),
+    purchaseImage: document.getElementById('purchase-image'),
+    purchaseName: document.getElementById('purchase-name'),
+    purchaseUnitPrice: document.getElementById('purchase-unit-price'),
+    purchaseQuantity: document.getElementById('purchase-quantity'),
+    purchaseTotal: document.getElementById('purchase-total'),
+    purchaseError: document.getElementById('purchase-error'),
+    payCash: document.getElementById('pay-cash'),
+    payPoint: document.getElementById('pay-point'),
+    purchaseCancel: document.getElementById('purchase-cancel'),
     message: document.getElementById('message'),
     wonderBerry: document.getElementById('wonder-berry'),
     lunaCrystal: document.getElementById('luna-crystal'),
@@ -403,14 +414,55 @@
     if (result.ok) commit();
   });
 
+  // 상품을 누르면 구매 수량과 결제 수단을 고르는 창을 연다.
+  var selectedProductId = null;
+
+  function purchaseImage(product) {
+    return product.field === 'wonderBerry' ? GachaData.WONDER_BERRY_ICON : GachaData.LUNA_CRYSTAL_ICON;
+  }
+
+  function renderPurchaseDialog() {
+    var product = GameState.PRODUCTS[selectedProductId];
+    var quantity = Number(els.purchaseQuantity.value);
+    var valid = Number.isInteger(quantity) && quantity >= 1 && quantity <= 100;
+    var total = valid ? product.price * quantity : 0;
+    els.purchaseTotal.textContent = won(total);
+    els.purchaseError.textContent = valid ? '' : '구매 수량은 1개부터 100개까지 입력해 주세요.';
+    els.payCash.textContent = '캐시로 결제 (보유 ' + won(state.cash) + ')';
+    els.payPoint.textContent = '메이플포인트로 결제 (보유 ' + point(state.maplePoint) + ')';
+    els.payCash.disabled = !valid || state.cash < total;
+    els.payPoint.disabled = !valid || state.maplePoint < total;
+  }
+
+  function openPurchase(productId) {
+    selectedProductId = productId;
+    var product = GameState.PRODUCTS[productId];
+    els.purchaseName.textContent = product.label;
+    els.purchaseUnitPrice.textContent = '상품 1개당 ' + won(product.price);
+    els.purchaseImage.src = purchaseImage(product);
+    els.purchaseImage.alt = '';
+    els.purchaseQuantity.value = 1;
+    renderPurchaseDialog();
+    els.purchaseDialog.showModal();
+  }
+
+  function completePurchase(payment) {
+    var quantity = Number(els.purchaseQuantity.value);
+    var result = GameState.purchase(state, selectedProductId, payment, quantity);
+    if (!result.ok) { els.purchaseError.textContent = result.error; return; }
+    var product = GameState.PRODUCTS[selectedProductId];
+    els.purchaseDialog.close();
+    showMessage(product.label + ' 상품을 ' + quantity + '개 구매했습니다. (' + won(result.totalPrice) + ')');
+    commit();
+  }
+
   Array.prototype.forEach.call(document.querySelectorAll('[data-product]'), function (btn) {
-    btn.addEventListener('click', function () {
-      var id = btn.getAttribute('data-product');
-      var result = GameState.purchase(state, id);
-      showMessage(result.ok ? GameState.PRODUCTS[id].label + ' 구매 완료' : result.error);
-      if (result.ok) commit();
-    });
+    btn.addEventListener('click', function () { openPurchase(btn.getAttribute('data-product')); });
   });
+  els.purchaseQuantity.addEventListener('input', renderPurchaseDialog);
+  els.payCash.addEventListener('click', function () { completePurchase('cash'); });
+  els.payPoint.addEventListener('click', function () { completePurchase('maplePoint'); });
+  els.purchaseCancel.addEventListener('click', function () { els.purchaseDialog.close(); });
 
   Array.prototype.forEach.call(document.querySelectorAll('[data-draw]'), function (btn) {
     btn.addEventListener('click', function () {
