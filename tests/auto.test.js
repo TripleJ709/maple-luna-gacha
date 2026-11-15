@@ -69,3 +69,13 @@ test('잘못된 옵션/대기 결과가 있으면 실행하지 않음', () => {
   S.drawWonderBerry(s, 1);
   assert.equal(Auto.run(s, { strategy: 'sweet', spendLimit: BIG }).reason, 'pending');
 });
+
+test('자동 합성: 메이플포인트도 구매에 쓰고, 합계가 모자랄 때만 자동 충전', () => {
+  const s = S.createState();
+  s.maplePoint = 100000;
+  const r = Auto.run(s, { strategy: 'sweet', spendLimit: BIG }, seeded(3));
+  assert.equal(r.success, true);
+  assert.equal(r.spent, s.totalSpent);
+  assert.ok(s.maplePoint >= 0 && s.cash >= 0);
+  assert.ok(s.maplePoint < 100000); // 포인트부터 사용
+});

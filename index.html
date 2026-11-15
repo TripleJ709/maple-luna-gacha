@@ -14,6 +14,7 @@
 
   <section class="status-bar" aria-label="보유 재화">
     <span>💰 캐시 <strong id="cash">0원</strong></span>
+    <span>메이플포인트 <strong id="maple-point">0P</strong></span>
     <span>🧾 누적 사용 <strong id="total-spent">0원</strong></span>
     <span><img class="icon" src="assets/items/wonderberry.webp" alt="">원더베리 <strong id="wonder-berry">0</strong></span>
     <span><img class="icon" src="assets/items/luna-crystal.webp" alt="">루나 크리스탈 <strong id="luna-crystal">0</strong></span>
@@ -96,6 +97,10 @@
     </div>
 
     <div class="tab-panel" id="tab-stats" role="tabpanel" hidden>
+      <section class="panel wide">
+        <h2>사용 금액</h2>
+        <div id="money-summary"></div>
+      </section>
       <section class="panel wide">
         <h2>📊 결과 비율 (실제 vs 공식 확률)</h2>
         <p class="desc">횟수가 적을수록 공식 확률과 차이가 큰 것이 정상입니다. 횟수가 늘수록 공식 확률에 가까워집니다.</p>

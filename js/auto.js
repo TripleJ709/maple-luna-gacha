@@ -44,8 +44,8 @@
     function buy(productId) {
       var product = State.PRODUCTS[productId];
       if (state.totalSpent - startSpent + product.price > limit) return false;
-      if (state.cash < product.price) {
-        var shortage = product.price - state.cash;
+      if (state.cash + state.maplePoint < product.price) {
+        var shortage = product.price - state.cash - state.maplePoint;
         State.charge(state, Math.ceil(shortage / State.CHARGE_UNIT) * State.CHARGE_UNIT);
       }
       State.purchase(state, productId);

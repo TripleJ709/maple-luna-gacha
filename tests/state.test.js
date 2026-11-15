@@ -357,3 +357,72 @@ test('합성 창 실행: 칸이 비거나 불가 조합이면 거부, 성공 시
   assert.deepEqual([r2.ok, r2.mode, s.lunaCrystal], [true, 'dream', 1]);
   assert.equal(r2.result.kind, Data.KIND.DREAM_PET);
 });
+
+test('페이백: 상급 펫 1개당 540P(원더베리 5,400원의 10%), 펫은 사라지고 누적 페이백 증가', () => {
+  assert.equal(Data.PAYBACK_POINT, 540);
+  const s = S.createState();
+  s.inventory = { 'wb:카투': 3 };
+  assert.deepEqual(S.payback(s, 'wb:카투'), { ok: true, point: 540 });
+  assert.equal(s.inventory['wb:카투'], 2);
+  assert.equal(s.maplePoint, 540);
+  assert.deepEqual(S.payback(s, 'wb:카투', 2), { ok: true, point: 1080 });
+  assert.equal(s.inventory['wb:카투'], undefined);
+  assert.equal(s.maplePoint, 1620);
+  assert.equal(s.totalPayback, 1620);
+});
+
+test('페이백 대상은 상급 펫 5종뿐: 원더 블랙, 소비 아이템, 스윗/드림/쁘띠/키는 불가', () => {
+  const s = S.createState();
+  const ok = ['카투', '카티엘', '파라키', '쿠키베어', '뚠냥'];
+  ok.forEach((n) => { s.inventory['wb:' + n] = 1; assert.equal(S.payback(s, 'wb:' + n).ok, true, n); });
+  ['wb:이그넬라', 'wb:오가닉 원더 쿠키', 'wb:고농축 프리미엄 생명의 물', 'sweet:프링', 'dream:레옹', 'petit:백야', 'key', 'nope'].forEach((id) => {
+    s.inventory[id] = 1;
+    assert.equal(S.payback(s, id).ok, false, id);
+    assert.equal(s.inventory[id], 1, id + ' 불변');
+  });
+});
+
+test('페이백: 수량 부족/잘못된 수량은 거부하고 상태 불변', () => {
+  const s = S.createState();
+  s.inventory = { 'wb:뚠냥': 1 };
+  const before = JSON.stringify(s);
+  assert.equal(S.payback(s, 'wb:뚠냥', 2).ok, false);
+  [0, -1, 1.5, NaN].forEach((c) => assert.equal(S.payback(s, 'wb:뚠냥', c).ok, false, String(c)));
+  assert.equal(S.payback(s, 'wb:카투').ok, false);
+  assert.equal(JSON.stringify(s), before);
+});
+
+test('메이플포인트는 캐시와 똑같이 구매에 쓰이고, 포인트를 먼저 쓴 뒤 모자란 만큼 캐시를 씀', () => {
+  const s = S.createState();
+  s.maplePoint = 540;
+  s.cash = 5000;
+  assert.equal(S.purchase(s, 'wonderBerry1').ok, true); // 5,400원
+  assert.equal(s.maplePoint, 0);
+  assert.equal(s.cash, 140);
+  assert.equal(s.totalSpent, 5400);
+  assert.equal(s.wonderBerry, 1);
+});
+
+test('메이플포인트만으로도 구매 가능, 합계가 모자라면 거부하고 불변', () => {
+  const s = S.createState();
+  s.maplePoint = 3900;
+  assert.equal(S.purchase(s, 'lunaCrystal1').ok, true);
+  assert.deepEqual([s.maplePoint, s.cash, s.lunaCrystal], [0, 0, 1]);
+  s.maplePoint = 2000; s.cash = 3000;
+  const before = JSON.stringify(s);
+  assert.equal(S.purchase(s, 'wonderBerry1').error, '캐시가 부족합니다.'); // 합계 5,000 < 5,400
+  assert.equal(JSON.stringify(s), before);
+});
+
+test('메이플포인트/누적 페이백은 저장·복구되고 초기화로 0이 됨, 깨진 값은 0', () => {
+  const st = memoryStorage();
+  const s = S.createState();
+  s.inventory = { 'wb:파라키': 1 };
+  S.payback(s, 'wb:파라키');
+  S.save(st, s);
+  const l = S.load(st);
+  assert.deepEqual([l.maplePoint, l.totalPayback], [540, 540]);
+  S.reset(s);
+  assert.deepEqual([s.maplePoint, s.totalPayback], [0, 0]);
+  assert.equal(S.load(memoryStorage(JSON.stringify({ maplePoint: -1, totalPayback: 'x' }))).maplePoint, 0);
+});
