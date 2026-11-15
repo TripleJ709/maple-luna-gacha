@@ -104,7 +104,7 @@
     }).filter(function (entry) { return entry.count > 0; });
     var expectedCount = candidates.reduce(function (sum, entry) { return sum + entry.count; }, 0);
     var expectedPoint = candidates.reduce(function (sum, entry) { return sum + entry.item.payback * entry.count; }, 0);
-    if (!expectedCount) { showMessage('페이백할 아이템이 없습니다.'); return; }
+    if (!expectedCount) { showMessage('페이백할 아이템이 없습니다.', 'error'); return; }
 
     var detail = everything
       ? '페이백 가능한 상급 펫 ' + expectedCount + '개를 모두 반환하고 ' + point(expectedPoint) + '를 받으시겠습니까?'
@@ -117,7 +117,7 @@
       var r = GameState.payback(state, entry.item.id, entry.count);
       if (r.ok) { total += r.point; count += entry.count; }
     });
-    showMessage('펫 ' + count + '개를 페이백해 ' + point(total) + '를 받았습니다.');
+    showMessage('펫 ' + count + '개를 페이백해 ' + point(total) + '를 받았습니다.', 'success');
     commit();
   }
 
@@ -170,8 +170,8 @@
   var SYNTH_NOTE = { dream: '재료로 쓴 스윗 펫과 같은 종류의 드림 펫은 나오지 않습니다.' };
 
   function openSynth() {
-    if (state.pending) { showMessage('이전 결과를 먼저 확인해 주세요.'); return; }
-    if (state.lunaCrystal < 1) { showMessage('루나 크리스탈이 부족합니다. 캐시샵에서 구매해 주세요.'); return; }
+    if (state.pending) { showMessage('이전 결과를 먼저 확인해 주세요.', 'error'); return; }
+    if (state.lunaCrystal < 1) { showMessage('루나 크리스탈이 부족합니다. 캐시샵에서 구매해 주세요.', 'error'); return; }
     synthSelected = [null, null];
     renderSynth();
     els.synthDialog.showModal();
@@ -402,7 +402,17 @@
     els.lunaCrystal.textContent = state.lunaCrystal;
   }
 
-  function showMessage(text) { els.message.textContent = text || ''; }
+  var messageTimer = null;
+  function showMessage(text, type) {
+    window.clearTimeout(messageTimer);
+    els.message.textContent = text || '';
+    els.message.className = 'toast' + (text ? ' visible ' + (type || 'info') : '');
+    if (text) {
+      messageTimer = window.setTimeout(function () {
+        els.message.classList.remove('visible');
+      }, 3000);
+    }
+  }
 
   function commit() {
     GameState.save(window.localStorage, state);
@@ -419,7 +429,10 @@
 
   els.chargeBtn.addEventListener('click', function () {
     var result = GameState.charge(state, Number(els.amount.value));
-    showMessage(result.ok ? won(Number(els.amount.value)) + ' 충전 완료 (가상 결제)' : result.error);
+    showMessage(
+      result.ok ? won(Number(els.amount.value)) + ' 충전 완료 (가상 결제)' : result.error,
+      result.ok ? 'success' : 'error'
+    );
     if (result.ok) commit();
   });
 
@@ -461,7 +474,7 @@
     if (!result.ok) { els.purchaseError.textContent = result.error; return; }
     var product = GameState.PRODUCTS[selectedProductId];
     els.purchaseDialog.close();
-    showMessage(product.label + ' 상품을 ' + quantity + '개 구매했습니다. (' + won(result.totalPrice) + ')');
+    showMessage(product.label + ' 상품을 ' + quantity + '개 구매했습니다. (' + won(result.totalPrice) + ')', 'success');
     commit();
   }
 
@@ -476,7 +489,7 @@
   Array.prototype.forEach.call(document.querySelectorAll('[data-draw]'), function (btn) {
     btn.addEventListener('click', function () {
       var result = GameState.drawWonderBerry(state, Number(btn.getAttribute('data-draw')));
-      if (!result.ok) { showMessage(result.error); return; }
+      if (!result.ok) { showMessage(result.error, 'error'); return; }
       showMessage('');
       commit();
       showResults('뽑기 결과', result.results);
@@ -512,7 +525,7 @@
   });
 
   els.autoBtn.addEventListener('click', function () {
-    if (state.pending) { showMessage('이전 결과를 먼저 확인해 주세요.'); return; }
+    if (state.pending) { showMessage('이전 결과를 먼저 확인해 주세요.', 'error'); return; }
     var strategy = els.autoStrategy.options[els.autoStrategy.selectedIndex].textContent;
     var target = els.autoTarget.options[els.autoTarget.selectedIndex].textContent;
     var limit = Number(els.autoLimit.value);
@@ -556,7 +569,7 @@
     GameState.reset(state);
     els.autoResult.textContent = '';
     commit();
-    showMessage('초기화했습니다.');
+    showMessage('초기화했습니다.', 'success');
   });
 
   // 탭 전환: 선택한 탭의 화면만 보이게 한다.
