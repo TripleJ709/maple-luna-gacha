@@ -175,5 +175,22 @@
   });
   els.resultClose.addEventListener('click', function () { els.dialog.close(); });
 
+  // 탭 전환: 선택한 탭의 화면만 보이게 한다.
+  var tabButtons = document.querySelectorAll('.tab');
+  function selectTab(name) {
+    Array.prototype.forEach.call(tabButtons, function (b) {
+      var on = b.getAttribute('data-tab') === name;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.tab-panel'), function (p) {
+      p.hidden = p.id !== 'tab-' + name;
+    });
+    showMessage('');
+  }
+  Array.prototype.forEach.call(tabButtons, function (b) {
+    b.addEventListener('click', function () { selectTab(b.getAttribute('data-tab')); });
+  });
+
   render();
 })();

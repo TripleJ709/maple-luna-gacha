@@ -12,57 +12,74 @@
     <p class="notice">비공식 팬 프로젝트입니다. 실제 결제는 이루어지지 않습니다.</p>
   </header>
 
+  <section class="status-bar" aria-label="보유 재화">
+    <span>💰 캐시 <strong id="cash">0원</strong></span>
+    <span>🧾 누적 사용 <strong id="total-spent">0원</strong></span>
+    <span>🍓 원더베리 <strong id="wonder-berry">0</strong></span>
+    <span>💎 루나 크리스탈 <strong id="luna-crystal">0</strong></span>
+  </section>
+
+  <nav class="tabs" role="tablist" aria-label="메뉴">
+    <button type="button" role="tab" class="tab active" data-tab="cash" aria-selected="true">💰 캐시 / 캐시샵</button>
+    <button type="button" role="tab" class="tab" data-tab="draw" aria-selected="false">🍓 원더베리 뽑기</button>
+    <button type="button" role="tab" class="tab" data-tab="synth" aria-selected="false">💎 스윗 / 드림 합성</button>
+  </nav>
+  <p id="message" role="status"></p>
+
   <main class="layout">
-    <section id="wallet" class="panel">
-      <h2>내 캐시</h2>
-      <p class="stat">보유 캐시 <strong id="cash">0원</strong></p>
-      <p class="stat">누적 사용 금액 <strong id="total-spent">0원</strong></p>
-      <div class="row">
-        <label for="charge-amount">충전 금액</label>
-        <select id="charge-amount"></select>
-        <button id="charge-btn" type="button">캐시 충전</button>
-      </div>
-      <p id="message" role="status"></p>
-    </section>
+    <div class="tab-panel" id="tab-cash" role="tabpanel">
+      <section id="wallet" class="panel">
+        <h2>캐시 충전</h2>
+        <p class="desc">단순히 현재 캐시에 더해지는 가상 충전입니다.</p>
+        <div class="row">
+          <label for="charge-amount">충전 금액</label>
+          <select id="charge-amount"></select>
+          <button id="charge-btn" type="button" class="primary">캐시 충전</button>
+        </div>
+      </section>
 
-    <section id="shop" class="panel">
-      <h2>🛒 캐시샵</h2>
-      <p class="stat">원더베리 <strong id="wonder-berry">0</strong>개 · 루나 크리스탈 <strong id="luna-crystal">0</strong>개</p>
-      <div class="row">
-        <button type="button" data-product="wonderBerry1">원더베리 1개<small>5,400원</small></button>
-        <button type="button" data-product="wonderBerry11">원더베리 11개<small>54,000원</small></button>
-        <button type="button" data-product="lunaCrystal1">루나 크리스탈 1개<small>3,900원</small></button>
-      </div>
-    </section>
+      <section id="shop" class="panel">
+        <h2>🛒 캐시샵</h2>
+        <div class="row">
+          <button type="button" data-product="wonderBerry1">원더베리 1개<small>5,400원</small></button>
+          <button type="button" data-product="wonderBerry11">원더베리 11개<small>54,000원</small></button>
+          <button type="button" data-product="lunaCrystal1">루나 크리스탈 1개<small>3,900원</small></button>
+        </div>
+      </section>
+    </div>
 
-    <section id="draw" class="panel">
-      <h2>🍓 위습의 원더베리</h2>
-      <p class="desc">원더 블랙 펫 또는 펫 관련 아이템을 획득합니다.</p>
-      <div class="row">
-        <button type="button" class="primary" data-draw="1">1회 뽑기<small>원더베리 1개</small></button>
-        <button type="button" class="primary" data-draw="5">5회 뽑기<small>원더베리 5개</small></button>
-      </div>
-    </section>
+    <div class="tab-panel" id="tab-draw" role="tabpanel" hidden>
+      <section id="draw" class="panel">
+        <h2>🍓 위습의 원더베리</h2>
+        <p class="desc">원더 블랙 펫 또는 펫 관련 아이템을 획득합니다.</p>
+        <div class="row">
+          <button type="button" class="primary" data-draw="1">1회 뽑기<small>원더베리 1개</small></button>
+          <button type="button" class="primary" data-draw="5">5회 뽑기<small>원더베리 5개</small></button>
+        </div>
+      </section>
+    </div>
 
-    <section id="sweet" class="panel">
-      <h2>💎 루나 크리스탈 스윗</h2>
-      <p class="desc">원더 블랙 펫 2개(종류 무관) + 루나 크리스탈 1개</p>
-      <div class="row">
-        <select id="sweet-a" aria-label="재료 1"></select>
-        <select id="sweet-b" aria-label="재료 2"></select>
-        <button type="button" class="primary" id="sweet-btn">스윗 합성</button>
-      </div>
-    </section>
+    <div class="tab-panel" id="tab-synth" role="tabpanel" hidden>
+      <section id="sweet" class="panel">
+        <h2>💎 루나 크리스탈 스윗</h2>
+        <p class="desc">원더 블랙 펫 2개(종류 무관) + 루나 크리스탈 1개</p>
+        <div class="row">
+          <select id="sweet-a" aria-label="재료 1"></select>
+          <select id="sweet-b" aria-label="재료 2"></select>
+          <button type="button" class="primary" id="sweet-btn">스윗 합성</button>
+        </div>
+      </section>
 
-    <section id="dream" class="panel">
-      <h2>✨ 루나 크리스탈 드림</h2>
-      <p class="desc">루나 스윗 펫 1개 + 원더 블랙 펫 1개 + 루나 크리스탈 1개 (드림 펫은 재료로 쓸 수 없음)</p>
-      <div class="row">
-        <select id="dream-sweet" aria-label="스윗 펫"></select>
-        <select id="dream-black" aria-label="원더 블랙"></select>
-        <button type="button" class="primary" id="dream-btn">드림 합성</button>
-      </div>
-    </section>
+      <section id="dream" class="panel">
+        <h2>✨ 루나 크리스탈 드림</h2>
+        <p class="desc">루나 스윗 펫 1개 + 원더 블랙 펫 1개 + 루나 크리스탈 1개 (드림 펫은 재료로 쓸 수 없음)</p>
+        <div class="row">
+          <select id="dream-sweet" aria-label="스윗 펫"></select>
+          <select id="dream-black" aria-label="원더 블랙"></select>
+          <button type="button" class="primary" id="dream-btn">드림 합성</button>
+        </div>
+      </section>
+    </div>
 
     <section id="inventory" class="panel wide">
       <h2>🎒 인벤토리</h2>
