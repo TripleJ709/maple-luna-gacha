@@ -36,8 +36,8 @@ h3 { margin: 10px 0 4px; font-size: 0.9rem; color: var(--muted); }
 /* 상단 재화 표시줄과 탭 */
 .status-bar { max-width: 1100px; margin: 0 auto 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px; padding: 10px 14px; background: var(--panel); border: 2px solid var(--gold); border-radius: 12px; font-size: 0.95rem; }
 .status-bar strong { color: var(--gold); margin-left: 4px; }
-.tabs { max-width: 1100px; margin: 0 auto; display: flex; gap: 6px; }
-.tab { flex: 1; flex-direction: row; justify-content: center; border-radius: 10px 10px 0 0; border-bottom: 0; background: #151a42; color: var(--muted); font-weight: bold; }
+.tabs { max-width: 1100px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 6px; }
+.tab { flex: 1 1 140px; flex-direction: row; justify-content: center; border-radius: 10px 10px 0 0; border-bottom: 0; background: #151a42; color: var(--muted); font-weight: bold; }
 .tab.active { background: var(--panel); color: var(--gold); border-color: var(--gold); }
 .tab-panel { display: contents; }
 .tab-panel[hidden] { display: none; }
@@ -67,6 +67,9 @@ select { max-width: 100%; }
 .item img { height: 64px; width: auto; max-width: 100%; object-fit: contain; }
 dialog .item.has-img { max-width: 160px; font-size: 0.9rem; }
 dialog .item img { height: 96px; }
+
+#auto-result p { margin: 6px 0; }
+#auto-result p:first-child { color: var(--gold); font-weight: bold; }
 
 /* 통계 표와 기록 */
 .stats-table { width: 100%; border-collapse: collapse; margin-bottom: 6px; font-size: 0.9rem; }

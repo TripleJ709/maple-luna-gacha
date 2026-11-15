@@ -23,6 +23,7 @@
     <button type="button" role="tab" class="tab active" data-tab="cash" aria-selected="true">💰 캐시 / 캐시샵</button>
     <button type="button" role="tab" class="tab" data-tab="draw" aria-selected="false">🍓 원더베리 뽑기</button>
     <button type="button" role="tab" class="tab" data-tab="synth" aria-selected="false">💎 스윗 / 드림 합성</button>
+    <button type="button" role="tab" class="tab" data-tab="auto" aria-selected="false">🔁 자동 합성</button>
     <button type="button" role="tab" class="tab" data-tab="stats" aria-selected="false">📊 통계 / 기록</button>
   </nav>
   <p id="message" role="status"></p>
@@ -82,6 +83,26 @@
       </section>
     </div>
 
+    <div class="tab-panel" id="tab-auto" role="tabpanel" hidden>
+      <section id="auto" class="panel wide">
+        <h2>🔁 자동 반복 합성</h2>
+        <p class="desc">목표 루나 쁘띠가 나올 때까지 실제 규칙 그대로 반복합니다. 재료와 재화가 모자라면 자동으로 구매하고(원더베리는 11개 묶음), 캐시가 부족하면 자동 충전합니다. 얻은 아이템은 모두 인벤토리에 들어갑니다.</p>
+        <div class="row">
+          <label for="auto-strategy">방식</label>
+          <select id="auto-strategy">
+            <option value="sweet">스윗 합성만 반복</option>
+            <option value="dream">스윗 펫을 얻어 드림 합성 도전</option>
+          </select>
+          <label for="auto-target">목표</label>
+          <select id="auto-target"></select>
+          <label for="auto-limit">사용 한도</label>
+          <select id="auto-limit"></select>
+          <button type="button" class="primary" id="auto-btn">자동 진행</button>
+        </div>
+        <div id="auto-result"></div>
+      </section>
+    </div>
+
     <div class="tab-panel" id="tab-stats" role="tabpanel" hidden>
       <section class="panel wide">
         <h2>📊 결과 비율 (실제 vs 공식 확률)</h2>
@@ -110,6 +131,7 @@
   <script src="js/gacha.js"></script>
   <script src="js/state.js"></script>
   <script src="js/stats.js"></script>
+  <script src="js/auto.js"></script>
   <script src="js/ui.js"></script>
 </body>
 </html>

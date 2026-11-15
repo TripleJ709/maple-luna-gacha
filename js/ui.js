@@ -21,6 +21,11 @@
     dreamBlack: document.getElementById('dream-black'),
     dreamBtn: document.getElementById('dream-btn'),
     resultClose: document.getElementById('result-close'),
+    autoStrategy: document.getElementById('auto-strategy'),
+    autoTarget: document.getElementById('auto-target'),
+    autoLimit: document.getElementById('auto-limit'),
+    autoBtn: document.getElementById('auto-btn'),
+    autoResult: document.getElementById('auto-result'),
     statsList: document.getElementById('stats-list'),
     historyList: document.getElementById('history-list')
   };
@@ -232,6 +237,44 @@
   if (state.pending) {
     showResults(state.pending.title, state.pending.ids.map(function (id) { return GachaData.ITEM_INDEX[id]; }));
   }
+
+  // 자동 반복 합성: 목표와 사용 한도 선택지
+  [['any', '아무 루나 쁘띠']].concat(GachaData.SWEET_TABLE.filter(function (it) {
+    return it.kind === GachaData.KIND.PETIT;
+  }).map(function (it) { return [it.id, it.name]; })).forEach(function (t) {
+    var opt = document.createElement('option');
+    opt.value = t[0];
+    opt.textContent = t[1];
+    els.autoTarget.appendChild(opt);
+  });
+  [1000000, 3000000, 5000000, 10000000, 30000000].forEach(function (v) {
+    var opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = won(v);
+    els.autoLimit.appendChild(opt);
+  });
+
+  els.autoBtn.addEventListener('click', function () {
+    if (state.pending) { showMessage('이전 결과를 먼저 확인해 주세요.'); return; }
+    var sum = AutoSynth.run(state, {
+      strategy: els.autoStrategy.value,
+      target: els.autoTarget.value,
+      spendLimit: Number(els.autoLimit.value)
+    });
+    commit();
+    var found = sum.found ? sum.found.name : '';
+    var lines = [
+      sum.success ? '🎉 목표 달성! 획득: ' + found : '⛔ 사용 한도(' + won(Number(els.autoLimit.value)) + ')에 도달해 중단했습니다.',
+      '이번 실행 사용 금액: ' + won(sum.spent),
+      '구매 ' + sum.purchases + '회 · 원더베리 뽑기 ' + sum.draws + '회 · 스윗 합성 ' + sum.sweets + '회 · 드림 합성 ' + sum.dreams + '회'
+    ];
+    els.autoResult.textContent = '';
+    lines.forEach(function (t) {
+      var p = document.createElement('p');
+      p.textContent = t;
+      els.autoResult.appendChild(p);
+    });
+  });
 
   // 탭 전환: 선택한 탭의 화면만 보이게 한다.
   var tabButtons = document.querySelectorAll('.tab');
