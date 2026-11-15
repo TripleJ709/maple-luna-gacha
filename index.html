@@ -8,7 +8,7 @@
 </head>
 <body>
   <header class="top">
-    <h1>🌙 루나쁘띠 뽑기 시뮬레이터</h1>
+    <h1>루나쁘띠 뽑기 시뮬레이터</h1>
     <p class="notice">비공식 팬 프로젝트입니다. 실제 결제는 이루어지지 않습니다.</p>
   </header>
 
@@ -42,18 +42,35 @@
       </section>
 
       <section id="shop" class="panel">
-        <h2>🛒 캐시샵</h2>
-        <div class="row">
-          <button type="button" data-product="wonderBerry1"><span><img class="icon" src="assets/items/wonderberry.webp" alt=""> 원더베리 1개</span><small>5,400원</small></button>
-          <button type="button" data-product="wonderBerry11"><span><img class="icon" src="assets/items/wonderberry.webp" alt=""> 원더베리 11개</span><small>54,000원</small></button>
-          <button type="button" data-product="lunaCrystal1"><span><img class="icon" src="assets/items/luna-crystal.webp" alt=""> 루나 크리스탈 1개</span><small>3,900원</small></button>
+        <h2>캐시샵</h2>
+        <p class="desc">상품을 선택하면 수량과 결제 수단을 정할 수 있습니다.</p>
+        <div class="product-grid">
+          <button type="button" class="product-card" data-product="wonderBerry1">
+            <img src="assets/items/wonderberry.webp" alt="">
+            <strong>원더베리 1개</strong>
+            <span>5,400원</span>
+            <small>구매하기</small>
+          </button>
+          <button type="button" class="product-card featured" data-product="wonderBerry11">
+            <span class="badge">묶음 상품</span>
+            <img src="assets/items/wonderberry.webp" alt="">
+            <strong>원더베리 11개</strong>
+            <span>54,000원</span>
+            <small>구매하기</small>
+          </button>
+          <button type="button" class="product-card" data-product="lunaCrystal1">
+            <img src="assets/items/luna-crystal.webp" alt="">
+            <strong>루나 크리스탈 1개</strong>
+            <span>3,900원</span>
+            <small>구매하기</small>
+          </button>
         </div>
       </section>
     </div>
 
     <div class="tab-panel" id="tab-draw" role="tabpanel" hidden>
       <section id="draw" class="panel">
-        <h2>🍓 위습의 원더베리</h2>
+        <h2>위습의 원더베리</h2>
         <p class="desc">원더 블랙 펫 또는 펫 관련 아이템을 획득합니다.</p>
         <div class="row">
           <button type="button" class="primary" data-draw="1">1회 뽑기<small>원더베리 1개</small></button>
@@ -78,7 +95,7 @@
 
     <div class="tab-panel" id="tab-auto" role="tabpanel" hidden>
       <section id="auto" class="panel wide">
-        <h2>🔁 자동 반복 합성</h2>
+        <h2>자동 반복 합성</h2>
         <p class="desc">목표 루나 쁘띠가 나올 때까지 실제 규칙 그대로 반복합니다. 재료와 재화가 모자라면 자동으로 구매하고(원더베리는 11개 묶음), 캐시가 부족하면 자동 충전합니다. 얻은 아이템은 모두 인벤토리에 들어갑니다.</p>
         <div class="row">
           <label for="auto-strategy">방식</label>
@@ -102,24 +119,24 @@
         <div id="money-summary"></div>
       </section>
       <section class="panel wide">
-        <h2>📊 결과 비율 (실제 vs 공식 확률)</h2>
+        <h2>결과 비율 (실제 vs 공식 확률)</h2>
         <p class="desc">횟수가 적을수록 공식 확률과 차이가 큰 것이 정상입니다. 횟수가 늘수록 공식 확률에 가까워집니다.</p>
         <div id="stats-list"></div>
       </section>
       <section class="panel wide">
-        <h2>🕒 최근 기록 (최대 50개)</h2>
+        <h2>최근 기록 (최대 50개)</h2>
         <ul id="history-list"></ul>
       </section>
     </div>
 
     <section id="inventory" class="panel wide">
-      <h2>🎒 인벤토리</h2>
+      <h2>인벤토리</h2>
       <div id="inventory-list"></div>
     </section>
   </main>
 
   <footer class="footer">
-    <button type="button" id="reset-btn" class="danger">🗑 모든 데이터 초기화</button>
+    <button type="button" id="reset-btn" class="danger">모든 데이터 초기화</button>
   </footer>
 
   <dialog id="synth-dialog">
