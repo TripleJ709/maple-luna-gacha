@@ -90,8 +90,10 @@ test('1회 뽑기는 원더베리 1개, 5회 뽑기는 5개를 차감하고 결�
   assert.equal(r1.ok, true);
   assert.equal(r1.results.length, 1);
   assert.equal(s.wonderBerry, 5);
+  S.confirmPending(s);
   const r5 = S.drawWonderBerry(s, 5);
   assert.equal(r5.results.length, 5);
+  S.confirmPending(s);
   assert.equal(s.wonderBerry, 0);
   const total = Object.values(s.inventory).reduce((a, b) => a + b, 0);
   assert.equal(total, 6);
@@ -110,7 +112,7 @@ test('뽑기 결과 id는 모두 ITEM_INDEX에 존재', () => {
   const Data = require('../js/data.js');
   const s = S.createState();
   s.wonderBerry = 300;
-  for (let i = 0; i < 60; i++) S.drawWonderBerry(s, 5);
+  for (let i = 0; i < 60; i++) { S.drawWonderBerry(s, 5); S.confirmPending(s); }
   Object.keys(s.inventory).forEach((id) => assert.ok(Data.ITEM_INDEX[id], id));
 });
 
@@ -126,6 +128,7 @@ test('스윗 합성: 같은 종류 2개(이그넬라+이그넬라) 가능, 재�
   assert.equal(r.result.kind, Data.KIND.SWEET_PET);
   assert.equal(s.inventory['wb:이그넬라'], undefined);
   assert.equal(s.lunaCrystal, 0);
+  S.confirmPending(s);
   assert.equal(s.inventory[r.result.id], 1);
 });
 
@@ -135,6 +138,7 @@ test('스윗 합성: 다른 종류 2개(이그넬라+아쿠엘) 가능', () => {
   s.inventory['wb:아쿠엘'] = 3;
   s.lunaCrystal = 2;
   assert.equal(S.synthesizeSweet(s, 'wb:이그넬라', 'wb:아쿠엘').ok, true);
+  S.confirmPending(s);
   assert.equal(s.inventory['wb:이그넬라'], undefined);
   assert.equal(s.inventory['wb:아쿠엘'], 2);
   assert.equal(s.lunaCrystal, 1);
@@ -168,8 +172,10 @@ test('스윗 합성 결과: 쁘띠/키도 지급되고 개수가 누적', () => 
   // 표 끝부분(키 1.96%)과 쁘띠 구간을 강제로 뽑는다.
   const rKey = S.synthesizeSweet(s, 'wb:이그넬라', 'wb:이그넬라', () => 0.999);
   assert.equal(rKey.result.kind, Data.KIND.KEY);
+  S.confirmPending(s);
   const rPetit = S.synthesizeSweet(s, 'wb:이그넬라', 'wb:이그넬라', () => 0.9);
   assert.equal(rPetit.result.kind, Data.KIND.PETIT);
+  S.confirmPending(s);
   assert.equal(s.inventory.key, 1);
 });
 
@@ -188,6 +194,7 @@ test('드림 합성: 재료(스윗 펫, 원더 블랙, 크리스탈) 소모 후 
   assert.equal(s.inventory['sweet:프링'], undefined);
   assert.equal(s.inventory['wb:아쿠엘'], undefined);
   assert.equal(s.lunaCrystal, 0);
+  S.confirmPending(s);
   assert.equal(s.inventory[r.result.id], 1);
 });
 
@@ -196,6 +203,7 @@ test('드림 합성: 재료로 쓴 스윗 펫과 같은 종류의 드림 펫은 
   for (let i = 0; i < 3000; i++) {
     const s = dreamSetup();
     const r = S.synthesizeDream(s, 'sweet:프링', 'wb:아쿠엘', rng);
+    S.confirmPending(s);
     assert.ok(!(r.result.kind === Data.KIND.DREAM_PET && r.result.name === '프링'));
   }
 });
@@ -227,7 +235,46 @@ test('드림 합성 결과(드림 펫)는 인벤토리에 쌓이지만 다시 �
   const s = dreamSetup();
   const r = S.synthesizeDream(s, 'sweet:프링', 'wb:아쿠엘', seq(0));
   assert.equal(r.result.kind, Data.KIND.DREAM_PET);
+  S.confirmPending(s);
   s.inventory['wb:이그넬라'] = 1;
   s.lunaCrystal = 1;
   assert.equal(S.synthesizeDream(s, r.result.id, 'wb:이그넬라').ok, false);
+});
+
+test('확인 전에는 인벤토리에 반영되지 않고, 확인하면 반영되어 대기가 비워짐', () => {
+  const s = S.createState();
+  s.wonderBerry = 5;
+  const r = S.drawWonderBerry(s, 5);
+  assert.deepEqual(s.inventory, {});
+  assert.equal(s.pending.ids.length, 5);
+  const c = S.confirmPending(s);
+  assert.equal(c.ok, true);
+  assert.equal(c.items.length, 5);
+  assert.equal(s.pending, null);
+  assert.equal(Object.values(s.inventory).reduce((a, b) => a + b, 0), 5);
+  assert.deepEqual(S.confirmPending(s), { ok: false, items: [] }); // 이중 확인 방지
+});
+
+test('대기 결과가 있으면 새 뽑기/합성은 거부 (재료도 소모되지 않음)', () => {
+  const s = S.createState();
+  s.wonderBerry = 6;
+  s.lunaCrystal = 1;
+  s.inventory['wb:이그넬라'] = 2;
+  S.drawWonderBerry(s, 1);
+  const before = JSON.stringify(s);
+  assert.equal(S.drawWonderBerry(s, 1).error, '이전 결과를 먼저 확인해 주세요.');
+  assert.equal(S.synthesizeSweet(s, 'wb:이그넬라', 'wb:이그넬라').ok, false);
+  assert.equal(JSON.stringify(s), before);
+});
+
+test('대기 결과는 저장/복구되어 새로고침 후에도 유지, 깨진 id는 제거', () => {
+  const st = memoryStorage();
+  const s = S.createState();
+  s.wonderBerry = 1;
+  S.drawWonderBerry(s, 1);
+  S.save(st, s);
+  assert.deepEqual(S.load(st).pending, s.pending);
+  const bad = JSON.stringify({ pending: { title: 't', ids: ['nope', 'key'] } });
+  assert.deepEqual(S.load(memoryStorage(bad)).pending, { title: 't', ids: ['key'] });
+  assert.equal(S.load(memoryStorage(JSON.stringify({ pending: { title: 't', ids: ['nope'] } }))).pending, null);
 });
