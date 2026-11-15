@@ -14,12 +14,16 @@
     dialog: document.getElementById('result-dialog'),
     resultList: document.getElementById('result-list'),
     resultTitle: document.getElementById('result-title'),
-    sweetA: document.getElementById('sweet-a'),
-    sweetB: document.getElementById('sweet-b'),
-    sweetBtn: document.getElementById('sweet-btn'),
-    dreamSweet: document.getElementById('dream-sweet'),
-    dreamBlack: document.getElementById('dream-black'),
-    dreamBtn: document.getElementById('dream-btn'),
+    openSweet: document.getElementById('open-sweet'),
+    openDream: document.getElementById('open-dream'),
+    synthDialog: document.getElementById('synth-dialog'),
+    synthTitle: document.getElementById('synth-title'),
+    synthInfo: document.getElementById('synth-info'),
+    synthSlots: document.getElementById('synth-slots'),
+    synthPicker: document.getElementById('synth-picker'),
+    synthError: document.getElementById('synth-error'),
+    synthRun: document.getElementById('synth-run'),
+    synthCancel: document.getElementById('synth-cancel'),
     resultClose: document.getElementById('result-close'),
     autoStrategy: document.getElementById('auto-strategy'),
     autoTarget: document.getElementById('auto-target'),
@@ -98,33 +102,83 @@
     if (!any) els.inventory.textContent = '아직 획득한 아이템이 없습니다.';
   }
 
-  // 합성 재료 선택지: 보유 중인 해당 종류 아이템만 표시. 선택값은 가능하면 유지한다.
-  function fillOptions(sel, table, kind, emptyText) {
-    var prev = sel.value;
-    sel.textContent = '';
-    table.forEach(function (it) {
-      if (it.kind !== kind || !state.inventory[it.id]) return;
-      var opt = document.createElement('option');
-      opt.value = it.id;
-      opt.textContent = it.name + ' (보유 ' + state.inventory[it.id] + ')';
-      sel.appendChild(opt);
-    });
-    if (!sel.options.length) {
-      var empty = document.createElement('option');
-      empty.value = '';
-      empty.textContent = emptyText;
-      sel.appendChild(empty);
-    }
-    if (prev) sel.value = prev;
+  // ---- 합성 창: 루나 크리스탈 사용하기 → 재료 칸에 펫을 넣고 합성 ----
+  var synthMode = null;     // 'sweet' | 'dream'
+  var synthSelected = [];   // 칸별 선택된 아이템 id (비어 있으면 null)
+  var SYNTH_RESULT_TITLE = { sweet: '스윗 합성 결과', dream: '드림 합성 결과' };
+
+  function openSynth(mode) {
+    if (state.pending) { showMessage('이전 결과를 먼저 확인해 주세요.'); return; }
+    if (state.lunaCrystal < 1) { showMessage('루나 크리스탈이 부족합니다. 캐시샵에서 구매해 주세요.'); return; }
+    synthMode = mode;
+    synthSelected = GameState.SYNTH_MODES[mode].slots.map(function () { return null; });
+    renderSynth();
+    els.synthDialog.showModal();
   }
 
-  function renderSynthesisOptions() {
-    var black = GachaData.KIND.WONDER_BLACK;
-    fillOptions(els.sweetA, GachaData.WONDER_BERRY_TABLE, black, '원더 블랙 없음');
-    fillOptions(els.sweetB, GachaData.WONDER_BERRY_TABLE, black, '원더 블랙 없음');
-    fillOptions(els.dreamBlack, GachaData.WONDER_BERRY_TABLE, black, '원더 블랙 없음');
-    fillOptions(els.dreamSweet, GachaData.SWEET_TABLE, GachaData.KIND.SWEET_PET, '스윗 펫 없음');
+  function renderSynth() {
+    var def = GameState.SYNTH_MODES[synthMode];
+    els.synthTitle.textContent = def.label;
+    els.synthInfo.textContent = '루나 크리스탈 1개가 사용됩니다. (보유 ' + state.lunaCrystal + '개)';
+    els.synthError.textContent = '';
+
+    // 재료 칸: 넣은 펫을 누르면 빼낸다.
+    els.synthSlots.textContent = '';
+    def.slots.forEach(function (slot, i) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'slot' + (synthSelected[i] ? ' filled' : '');
+      if (synthSelected[i]) {
+        btn.appendChild(itemLabel(GachaData.ITEM_INDEX[synthSelected[i]]));
+        btn.title = '눌러서 빼기';
+        btn.addEventListener('click', function () { synthSelected[i] = null; renderSynth(); });
+      } else {
+        btn.textContent = slot.label + ' 넣기';
+        btn.disabled = true;
+      }
+      els.synthSlots.appendChild(btn);
+    });
+
+    // 인벤토리: 보유한 아이템을 모두 보여주고, 지금 넣을 수 없는 것은 비활성화한다.
+    els.synthPicker.textContent = '';
+    var any = false;
+    INVENTORY_GROUPS.forEach(function (group) {
+      Object.keys(state.inventory)
+        .map(function (id) { return GachaData.ITEM_INDEX[id]; })
+        .filter(function (it) { return it && group.kinds.indexOf(it.kind) !== -1; })
+        .forEach(function (it) {
+          any = true;
+          var used = synthSelected.filter(function (x) { return x === it.id; }).length;
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'pick';
+          btn.disabled = !GameState.canSelect(state, synthMode, synthSelected, it.id);
+          btn.appendChild(itemLabel(it, state.inventory[it.id] - used));
+          btn.addEventListener('click', function () {
+            var idx = GameState.firstOpenSlot(synthMode, synthSelected, it.id);
+            if (idx === -1) return;
+            synthSelected[idx] = it.id;
+            renderSynth();
+          });
+          els.synthPicker.appendChild(btn);
+        });
+    });
+    if (!any) els.synthPicker.textContent = '인벤토리가 비어 있습니다.';
+
+    els.synthRun.disabled = synthSelected.some(function (x) { return !x; });
   }
+
+  els.openSweet.addEventListener('click', function () { openSynth('sweet'); });
+  els.openDream.addEventListener('click', function () { openSynth('dream'); });
+  els.synthCancel.addEventListener('click', function () { els.synthDialog.close(); });
+  els.synthRun.addEventListener('click', function () {
+    var result = GameState.runSynthesis(state, synthMode, synthSelected);
+    if (!result.ok) { els.synthError.textContent = result.error; return; }
+    els.synthDialog.close();
+    showMessage('');
+    commit();
+    showResults(SYNTH_RESULT_TITLE[synthMode], [result.result]);
+  });
 
   // 희귀(등급 rare: 원더 블랙, 루나 쁘띠)가 나오면 팝업을 특별하게 연출한다.
   var SPARKLE_COUNT = 16;
@@ -214,7 +268,6 @@
   function render() {
     renderStats();
     renderInventory();
-    renderSynthesisOptions();
     els.cash.textContent = won(state.cash);
     els.totalSpent.textContent = won(state.totalSpent);
     els.wonderBerry.textContent = state.wonderBerry;
@@ -251,14 +304,6 @@
     });
   });
 
-  els.dreamBtn.addEventListener('click', function () {
-    var result = GameState.synthesizeDream(state, els.dreamSweet.value, els.dreamBlack.value);
-    if (!result.ok) { showMessage(result.error); return; }
-    showMessage('');
-    commit();
-    showResults('드림 합성 결과', [result.result]);
-  });
-
   Array.prototype.forEach.call(document.querySelectorAll('[data-draw]'), function (btn) {
     btn.addEventListener('click', function () {
       var result = GameState.drawWonderBerry(state, Number(btn.getAttribute('data-draw')));
@@ -269,13 +314,6 @@
     });
   });
 
-  els.sweetBtn.addEventListener('click', function () {
-    var result = GameState.synthesizeSweet(state, els.sweetA.value, els.sweetB.value);
-    if (!result.ok) { showMessage(result.error); return; }
-    showMessage('');
-    commit();
-    showResults('스윗 합성 결과', [result.result]);
-  });
   els.resultClose.addEventListener('click', function () { els.dialog.close(); });
 
   // 팝업이 닫히면(확인 버튼, Esc 모두) 대기 중인 결과를 인벤토리에 반영한다.

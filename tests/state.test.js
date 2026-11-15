@@ -300,3 +300,41 @@ test('초기화 후 저장하면 다시 불러와도 처음 상태', () => {
   S.save(st, s);
   assert.deepEqual(S.load(st), S.createState());
 });
+
+test('합성 창: 스윗은 원더 블랙만, 드림은 스윗 펫 칸/원더 블랙 칸에 맞는 것만 선택 가능', () => {
+  const s = S.createState();
+  s.inventory = { 'wb:이그넬라': 1, 'wb:카투': 1, 'sweet:프링': 1, 'dream:레옹': 1, 'petit:백야': 1, key: 1 };
+  assert.equal(S.canSelect(s, 'sweet', [null, null], 'wb:이그넬라'), true);
+  ['wb:카투', 'sweet:프링', 'dream:레옹', 'petit:백야', 'key', 'nope'].forEach((id) => {
+    assert.equal(S.canSelect(s, 'sweet', [null, null], id), false, id);
+  });
+  assert.equal(S.canSelect(s, 'dream', [null, null], 'sweet:프링'), true);
+  assert.equal(S.canSelect(s, 'dream', [null, null], 'wb:이그넬라'), true);
+  assert.equal(S.canSelect(s, 'dream', [null, null], 'dream:레옹'), false);
+});
+
+test('합성 창: 보유 수량을 넘겨 선택할 수 없고, 같은 종류 칸이 차면 더 못 넣음', () => {
+  const s = S.createState();
+  s.inventory = { 'wb:이그넬라': 1, 'wb:아쿠엘': 2 };
+  assert.equal(S.canSelect(s, 'sweet', ['wb:이그넬라', null], 'wb:이그넬라'), false); // 1개뿐
+  assert.equal(S.canSelect(s, 'sweet', ['wb:아쿠엘', null], 'wb:아쿠엘'), true);      // 2개 보유
+  assert.equal(S.canSelect(s, 'sweet', ['wb:아쿠엘', 'wb:아쿠엘'], 'wb:이그넬라'), false); // 칸이 가득 참
+  s.inventory['sweet:프링'] = 1;
+  assert.equal(S.canSelect(s, 'dream', ['sweet:프링', null], 'sweet:프링'), false);   // 스윗 칸은 이미 참
+  assert.equal(S.firstOpenSlot('dream', [null, null], 'wb:아쿠엘'), 1);
+  assert.equal(S.firstOpenSlot('dream', [null, null], 'sweet:프링'), 0);
+});
+
+test('합성 창 실행: 칸이 비면 거부, 가득 차면 합성되고 크리스탈은 이때 소모', () => {
+  const s = S.createState();
+  s.inventory = { 'wb:이그넬라': 1, 'wb:아쿠엘': 1, 'sweet:프링': 1 };
+  s.lunaCrystal = 1;
+  assert.equal(S.runSynthesis(s, 'sweet', ['wb:이그넬라', null]).ok, false);
+  assert.equal(s.lunaCrystal, 1);
+  assert.equal(S.runSynthesis(s, 'dream', ['wb:아쿠엘', 'sweet:프링']).ok, false); // 칸 순서가 맞지 않음
+  assert.equal(s.lunaCrystal, 1);
+  const r = S.runSynthesis(s, 'sweet', ['wb:이그넬라', 'wb:아쿠엘'], () => 0);
+  assert.equal(r.ok, true);
+  assert.equal(s.lunaCrystal, 0);
+  assert.equal(s.inventory['wb:이그넬라'], undefined);
+});

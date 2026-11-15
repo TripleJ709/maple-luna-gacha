@@ -66,19 +66,15 @@
         <h2><img class="icon" src="assets/items/luna-crystal.webp" alt=""> 루나 크리스탈 스윗</h2>
         <p class="desc">원더 블랙 펫 2개(종류 무관) + 루나 크리스탈 1개</p>
         <div class="row">
-          <select id="sweet-a" aria-label="재료 1"></select>
-          <select id="sweet-b" aria-label="재료 2"></select>
-          <button type="button" class="primary" id="sweet-btn">스윗 합성</button>
+          <button type="button" class="primary" id="open-sweet">루나 크리스탈 사용하기</button>
         </div>
       </section>
 
       <section id="dream" class="panel">
-        <h2>✨ 루나 크리스탈 드림</h2>
+        <h2><img class="icon" src="assets/items/luna-crystal.webp" alt=""> 루나 크리스탈 드림</h2>
         <p class="desc">루나 스윗 펫 1개 + 원더 블랙 펫 1개 + 루나 크리스탈 1개 (드림 펫은 재료로 쓸 수 없음)</p>
         <div class="row">
-          <select id="dream-sweet" aria-label="스윗 펫"></select>
-          <select id="dream-black" aria-label="원더 블랙"></select>
-          <button type="button" class="primary" id="dream-btn">드림 합성</button>
+          <button type="button" class="primary" id="open-dream">루나 크리스탈 사용하기</button>
         </div>
       </section>
     </div>
@@ -124,6 +120,19 @@
   <footer class="footer">
     <button type="button" id="reset-btn" class="danger">🗑 모든 데이터 초기화</button>
   </footer>
+
+  <dialog id="synth-dialog">
+    <h2 id="synth-title">합성</h2>
+    <p class="desc" id="synth-info"></p>
+    <div id="synth-slots" class="slots"></div>
+    <h3>인벤토리에서 재료 선택</h3>
+    <div id="synth-picker"></div>
+    <p id="synth-error" role="alert"></p>
+    <div class="row">
+      <button type="button" class="primary" id="synth-run" disabled>합성하기</button>
+      <button type="button" id="synth-cancel">취소</button>
+    </div>
+  </dialog>
 
   <dialog id="result-dialog">
     <h2 id="result-title">뽑기 결과</h2>
