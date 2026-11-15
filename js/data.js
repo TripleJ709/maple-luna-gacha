@@ -42,25 +42,25 @@
     '쁘띠 블러드': 'assets/items/petit-blood.png'
   };
 
-  // 이름 -> 움직이는 펫 이미지(mp4, gif). 결과 팝업에서 우선 보여주고, 정지 이미지가 없으면 인벤토리에서도 쓴다.
+  // 이름 -> 움직이는 펫 이미지(투명 배경 animated webp, gif). 결과 팝업에서 우선 보여주고, 정지 이미지가 없으면 인벤토리에서도 쓴다.
   var ANIMS = {
-    '이그넬라': 'assets/anim/ignella.mp4',
-    '아쿠엘': 'assets/anim/aquel.mp4',
-    '윈디르': 'assets/anim/windir.mp4',
-    '카투': 'assets/anim/katu.mp4',
+    '이그넬라': 'assets/anim/ignella.webp',
+    '아쿠엘': 'assets/anim/aquel.webp',
+    '윈디르': 'assets/anim/windir.webp',
+    '카투': 'assets/anim/katu.webp',
     '카티엘': 'assets/anim/katiel.gif',
-    '파라키': 'assets/anim/paraki.mp4',
-    '쿠키베어': 'assets/anim/cookie-bear.mp4',
-    '뚠냥': 'assets/anim/ttunnyang.mp4',
-    '쿨쿨 곰돌이': 'assets/anim/kulkul-bear.mp4',
-    '쿨쿨 다람쥐': 'assets/anim/kulkul-squirrel.mp4',
-    '쿨쿨 너구리': 'assets/anim/kulkul-raccoon.mp4',
-    '프링': 'assets/anim/pring.mp4',
-    '레옹': 'assets/anim/leon.mp4',
-    '주니': 'assets/anim/juni.mp4',
-    '토토 사원': 'assets/anim/toto.mp4',
-    '곰곰 사원': 'assets/anim/gomgom.mp4',
-    '펭펭 사원': 'assets/anim/pengpeng.mp4'
+    '파라키': 'assets/anim/paraki.webp',
+    '쿠키베어': 'assets/anim/cookie-bear.webp',
+    '뚠냥': 'assets/anim/ttunnyang.webp',
+    '쿨쿨 곰돌이': 'assets/anim/kulkul-bear.webp',
+    '쿨쿨 다람쥐': 'assets/anim/kulkul-squirrel.webp',
+    '쿨쿨 너구리': 'assets/anim/kulkul-raccoon.webp',
+    '프링': 'assets/anim/pring.webp',
+    '레옹': 'assets/anim/leon.webp',
+    '주니': 'assets/anim/juni.webp',
+    '토토 사원': 'assets/anim/toto.webp',
+    '곰곰 사원': 'assets/anim/gomgom.webp',
+    '펭펭 사원': 'assets/anim/pengpeng.webp'
   };
 
   function item(id, name, kind, grade, prob) {
