@@ -31,7 +31,16 @@ h3 { margin: 10px 0 4px; font-size: 0.9rem; color: var(--muted); }
 .stat { margin: 4px 0; display: flex; justify-content: space-between; }
 .stat strong { color: var(--gold); }
 .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
-#message { min-height: 1.2em; margin: 8px 0 0; color: #ff9f9f; font-size: 0.85rem; }
+#message { min-height: 1.2em; max-width: 1100px; margin: 6px auto 8px; color: #ffb3b3; font-size: 0.9rem; text-align: center; }
+
+/* 상단 재화 표시줄과 탭 */
+.status-bar { max-width: 1100px; margin: 0 auto 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px; padding: 10px 14px; background: var(--panel); border: 2px solid var(--gold); border-radius: 12px; font-size: 0.95rem; }
+.status-bar strong { color: var(--gold); margin-left: 4px; }
+.tabs { max-width: 1100px; margin: 0 auto; display: flex; gap: 6px; }
+.tab { flex: 1; flex-direction: row; justify-content: center; border-radius: 10px 10px 0 0; border-bottom: 0; background: #151a42; color: var(--muted); font-weight: bold; }
+.tab.active { background: var(--panel); color: var(--gold); border-color: var(--gold); }
+.tab-panel { display: contents; }
+.tab-panel[hidden] { display: none; }
 
 button, select {
   font: inherit;
