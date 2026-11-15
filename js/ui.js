@@ -26,6 +26,7 @@
     autoLimit: document.getElementById('auto-limit'),
     autoBtn: document.getElementById('auto-btn'),
     autoResult: document.getElementById('auto-result'),
+    resetBtn: document.getElementById('reset-btn'),
     statsList: document.getElementById('stats-list'),
     historyList: document.getElementById('history-list')
   };
@@ -274,6 +275,15 @@
       p.textContent = t;
       els.autoResult.appendChild(p);
     });
+  });
+
+  // 초기화: 캐시, 인벤토리, 통계, 기록을 모두 처음 상태로 되돌린다.
+  els.resetBtn.addEventListener('click', function () {
+    if (!window.confirm('캐시, 인벤토리, 통계, 기록을 모두 처음 상태로 되돌립니다. 계속할까요?')) return;
+    GameState.reset(state);
+    els.autoResult.textContent = '';
+    commit();
+    showMessage('초기화했습니다.');
   });
 
   // 탭 전환: 선택한 탭의 화면만 보이게 한다.
