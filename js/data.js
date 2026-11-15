@@ -106,7 +106,20 @@
   var ITEM_INDEX = {};
   WONDER_BERRY_TABLE.concat(SWEET_TABLE, DREAM_TABLE).forEach(function (e) { ITEM_INDEX[e.id] = e; });
 
+  /*
+   * 페이백: 위습의 원더베리로 얻은 원더 펫(교환하지 않은 경우)은 원더베리 금액의 10%를 메이플포인트로 돌려받는다.
+   * 출처: https://maplestory.nexon.com/Guide/N23GameInformation/Articles/437
+   * 대상은 상급 펫 5종(카투, 카티엘, 파라키, 쿠키베어, 뚠냥). 금액은 원더베리 1개 가격(5,400원)의 10%인 540P.
+   */
+  var PAYBACK_RATE = 0.1;
+  var PAYBACK_POINT = Math.round(PRICES.wonderBerry1 * PAYBACK_RATE);
+  var PAYBACK_NAMES = ['카투', '카티엘', '파라키', '쿠키베어', '뚠냥'];
+  WONDER_BERRY_TABLE.forEach(function (e) {
+    e.payback = PAYBACK_NAMES.indexOf(e.name) !== -1 ? PAYBACK_POINT : 0;
+  });
+
   var data = {
+    PAYBACK_POINT: PAYBACK_POINT,
     ITEM_INDEX: ITEM_INDEX,
     GRADE: GRADE,
     KIND: KIND,

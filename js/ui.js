@@ -4,6 +4,8 @@
 
   var els = {
     cash: document.getElementById('cash'),
+    maplePoint: document.getElementById('maple-point'),
+    moneySummary: document.getElementById('money-summary'),
     totalSpent: document.getElementById('total-spent'),
     amount: document.getElementById('charge-amount'),
     chargeBtn: document.getElementById('charge-btn'),
@@ -36,6 +38,7 @@
   };
 
   function won(n) { return n.toLocaleString('ko-KR') + '원'; }
+  function point(n) { return n.toLocaleString('ko-KR') + 'P'; }
 
   // 인벤토리 표시 묶음 (순서대로 표시)
   var K = GachaData.KIND;
@@ -83,6 +86,21 @@
     return span;
   }
 
+  // 페이백: 선택한 펫을 1개씩(또는 보유한 전부) 메이플포인트로 돌려받는다.
+  function doPayback(items, everything) {
+    var total = 0;
+    var count = 0;
+    items.forEach(function (it) {
+      var n = everything ? state.inventory[it.id] || 0 : 1;
+      if (!n) return;
+      var r = GameState.payback(state, it.id, n);
+      if (r.ok) { total += r.point; count += n; }
+    });
+    if (!count) { showMessage('페이백할 아이템이 없습니다.'); return; }
+    showMessage('펫 ' + count + '개를 페이백해 ' + point(total) + '를 받았습니다.');
+    commit();
+  }
+
   function renderInventory() {
     els.inventory.textContent = '';
     var any = false;
@@ -96,7 +114,30 @@
       var h = document.createElement('h3');
       h.textContent = group.title;
       box.appendChild(h);
-      items.forEach(function (it) { box.appendChild(itemLabel(it, state.inventory[it.id])); });
+      var refundable = items.filter(function (it) { return it.payback; });
+      if (refundable.length) {
+        var all = document.createElement('button');
+        all.type = 'button';
+        all.className = 'payback-all';
+        all.textContent = '상급 펫 모두 페이백';
+        all.addEventListener('click', function () { doPayback(refundable, true); });
+        h.appendChild(all);
+      }
+      items.forEach(function (it) {
+        var label = itemLabel(it, state.inventory[it.id]);
+        if (!it.payback) { box.appendChild(label); return; }
+        // 원더 펫은 인벤토리에서 바로 페이백(메이플포인트로 돌려받기)할 수 있다.
+        var entry = document.createElement('span');
+        entry.className = 'inv-entry';
+        entry.appendChild(label);
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'payback-btn';
+        btn.textContent = '페이백 +' + point(it.payback);
+        btn.addEventListener('click', function () { doPayback([it], false); });
+        entry.appendChild(btn);
+        box.appendChild(entry);
+      });
       els.inventory.appendChild(box);
     });
     if (!any) els.inventory.textContent = '아직 획득한 아이템이 없습니다.';
@@ -270,7 +311,25 @@
 
   function pct(n) { return (Math.round(n * 100) / 100).toFixed(2) + '%'; }
 
+  function renderMoneySummary() {
+    els.moneySummary.textContent = '';
+    [
+      ['누적 사용 금액', won(state.totalSpent)],
+      ['누적 페이백', point(state.totalPayback)],
+      ['실질 사용 금액 (사용 금액 - 페이백)', won(state.totalSpent - state.totalPayback)]
+    ].forEach(function (row) {
+      var p = document.createElement('p');
+      p.className = 'stat';
+      p.appendChild(document.createTextNode(row[0] + ' '));
+      var strong = document.createElement('strong');
+      strong.textContent = row[1];
+      p.appendChild(strong);
+      els.moneySummary.appendChild(p);
+    });
+  }
+
   function renderStats() {
+    renderMoneySummary();
     els.statsList.textContent = '';
     Object.keys(GameStats.SOURCES).forEach(function (src) {
       var sum = GameStats.summarize(state, src);
@@ -317,6 +376,7 @@
     renderStats();
     renderInventory();
     els.cash.textContent = won(state.cash);
+    els.maplePoint.textContent = point(state.maplePoint);
     els.totalSpent.textContent = won(state.totalSpent);
     els.wonderBerry.textContent = state.wonderBerry;
     els.lunaCrystal.textContent = state.lunaCrystal;

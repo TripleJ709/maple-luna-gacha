@@ -13,6 +13,8 @@
   function createState() {
     return {
       cash: 0,          // 현재 캐시(원)
+      maplePoint: 0,    // 메이플포인트(P). 캐시와 똑같이 쓸 수 있다. (페이백으로 지급)
+      totalPayback: 0,  // 누적 페이백 금액(P)
       totalSpent: 0,    // 누적 사용 금액(구매에 쓴 금액, 충전액 제외)
       wonderBerry: 0,   // 보유 원더베리 수
       lunaCrystal: 0,   // 보유 루나 크리스탈 수
@@ -43,11 +45,30 @@
   function purchase(state, productId) {
     var product = Object.prototype.hasOwnProperty.call(PRODUCTS, productId) ? PRODUCTS[productId] : null;
     if (!product) return { ok: false, error: '알 수 없는 상품입니다.' };
-    if (state.cash < product.price) return { ok: false, error: '캐시가 부족합니다.' };
-    state.cash -= product.price;
+    // 메이플포인트는 캐시와 똑같이 쓸 수 있다. 메이플포인트를 먼저 쓰고 모자란 만큼 캐시를 쓴다.
+    if (state.cash + state.maplePoint < product.price) return { ok: false, error: '캐시가 부족합니다.' };
+    var byPoint = Math.min(state.maplePoint, product.price);
+    state.maplePoint -= byPoint;
+    state.cash -= product.price - byPoint;
     state.totalSpent += product.price;
     state[product.field] += product.amount;
     return { ok: true };
+  }
+
+  // 페이백: 인벤토리의 원더 펫(상급 5종)을 count개 돌려주고 메이플포인트를 받는다. (1개당 540P)
+  function payback(state, id, count) {
+    var item = Data.ITEM_INDEX[id];
+    count = count === undefined ? 1 : count;
+    if (!item || !item.payback) return { ok: false, error: '페이백할 수 없는 아이템입니다.' };
+    if (!Number.isInteger(count) || count < 1) return { ok: false, error: '수량이 올바르지 않습니다.' };
+    if ((state.inventory[id] || 0) < count) return { ok: false, error: '보유 수량이 부족합니다.' };
+    var needs = {};
+    needs[id] = count;
+    removeItems(state, needs);
+    var point = item.payback * count;
+    state.maplePoint += point;
+    state.totalPayback += point;
+    return { ok: true, point: point };
   }
 
   function addItem(state, id, n) {
@@ -217,7 +238,7 @@
   function sanitize(raw) {
     var base = createState();
     if (!raw || typeof raw !== 'object') return base;
-    ['cash', 'totalSpent', 'wonderBerry', 'lunaCrystal'].forEach(function (k) {
+    ['cash', 'maplePoint', 'totalPayback', 'totalSpent', 'wonderBerry', 'lunaCrystal'].forEach(function (k) {
       if (Number.isFinite(raw[k]) && raw[k] >= 0) base[k] = Math.floor(raw[k]);
     });
     if (raw.inventory && typeof raw.inventory === 'object') {
@@ -272,6 +293,7 @@
     PRODUCTS: PRODUCTS,
     purchase: purchase,
     addItem: addItem,
+    payback: payback,
     confirmPending: confirmPending,
     HISTORY_LIMIT: HISTORY_LIMIT,
     drawWonderBerry: drawWonderBerry,
