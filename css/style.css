@@ -181,6 +181,103 @@ button:disabled { cursor: not-allowed; opacity: 0.45; filter: grayscale(0.5); }
 #synth-dialog .item .sprite { width: 64px; height: 64px; }
 #synth-dialog .item.has-img { max-width: 110px; font-size: 0.8rem; }
 
+/* 메인 화면: 장식보다 정보 구조를 우선한 밝고 평평한 스타일 */
+body {
+  background: #f3f1ec;
+  color: #30343b;
+}
+.top { max-width: 1100px; margin: 4px auto 22px; }
+h1 { color: #26364f; text-shadow: none; font-size: 1.75rem; letter-spacing: -0.04em; }
+.notice { color: #777b83; }
+.layout { gap: 12px; }
+.panel {
+  background: #fff;
+  border: 1px solid #d9dce3;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(40, 47, 60, 0.06);
+}
+.panel h2 { color: #26364f; border-color: #e1e3e8; font-size: 1.08rem; }
+.panel h3 { color: #5d6470; }
+.panel .desc { color: #6f747d; }
+.panel .stat strong { color: #365b8d; }
+
+.status-bar {
+  background: rgba(255, 255, 255, 0.96);
+  color: #343943;
+  border: 1px solid #d5d9e1;
+  border-left: 4px solid #526f9d;
+  border-radius: 7px;
+  box-shadow: 0 3px 12px rgba(38, 48, 66, 0.09);
+  backdrop-filter: blur(8px);
+}
+.status-bar strong { color: #365b8d; }
+
+.tabs {
+  gap: 0;
+  padding: 0 8px;
+  border-bottom: 1px solid #cfd3db;
+}
+.tab {
+  background: transparent;
+  color: #686e78;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  padding: 12px 10px 10px;
+}
+.tab:hover { background: #e9edf3; filter: none; }
+.tab.active {
+  background: transparent;
+  color: #294f82;
+  border-color: #446b9e;
+}
+
+.panel button:not(.product-card), .panel select, .panel input {
+  background: #fff;
+  color: #30343b;
+  border-color: #c8cdd6;
+}
+.panel button:not(.product-card):hover { background: #f0f3f7; filter: none; }
+.panel button.primary {
+  background: #466b9b;
+  color: #fff;
+  border-color: #365985;
+  box-shadow: none;
+}
+.panel button.primary:hover { background: #3d608c; }
+.panel button.primary small { color: #e2e9f2; }
+.panel button:active, .tab:active { transform: none; }
+button:focus-visible, select:focus-visible, input:focus-visible {
+  outline: 3px solid rgba(68, 107, 158, 0.35);
+  outline-offset: 2px;
+}
+
+.product-grid { gap: 12px; }
+.product-card {
+  min-height: 148px;
+  background: #f8f9fb;
+  color: #30343b;
+  border-color: #d7dbe2;
+  border-radius: 7px;
+  box-shadow: none;
+}
+.product-card:hover { background: #f0f3f7; border-color: #9da9ba; filter: none; }
+.product-card strong { color: #30343b; }
+.product-card > span:not(.badge) { color: #294f82; }
+.product-card small { color: #777d87; }
+.product-card.featured { border-color: #7188aa; }
+.badge { background: #e3e9f2; color: #365985; }
+
+.panel .item { background: #f8f9fb; }
+.panel .grade-rare { color: #946300; box-shadow: 0 0 0 1px rgba(148, 99, 0, 0.18); }
+.panel .grade-high { color: #6843a0; }
+.panel .grade-normal { color: #59616d; }
+.stats-table th, .stats-table td, #history-list li { border-color: #e1e3e8; }
+.stats-table th, .history-meta { color: #737984; }
+.payback-btn, .payback-all { background: #e7f2eb !important; color: #2f6946 !important; border-color: #9bbda8 !important; }
+#auto-result p:first-child { color: #294f82; }
+button.danger { background: transparent; border-color: #c9a8ae; color: #8c3f4b; }
+
 /* 결과 팝업 */
 #result-dialog {
   width: min(92vw, 680px);
