@@ -99,15 +99,24 @@
 
   // 페이백: 선택한 펫을 1개씩(또는 보유한 전부) 메이플포인트로 돌려받는다.
   function doPayback(items, everything) {
+    var candidates = items.map(function (it) {
+      return { item: it, count: everything ? state.inventory[it.id] || 0 : 1 };
+    }).filter(function (entry) { return entry.count > 0; });
+    var expectedCount = candidates.reduce(function (sum, entry) { return sum + entry.count; }, 0);
+    var expectedPoint = candidates.reduce(function (sum, entry) { return sum + entry.item.payback * entry.count; }, 0);
+    if (!expectedCount) { showMessage('페이백할 아이템이 없습니다.'); return; }
+
+    var detail = everything
+      ? '페이백 가능한 상급 펫 ' + expectedCount + '개를 모두 반환하고 ' + point(expectedPoint) + '를 받으시겠습니까?'
+      : candidates[0].item.name + ' 1개를 반환하고 ' + point(expectedPoint) + '를 받으시겠습니까?';
+    if (!window.confirm(detail + '\n반환한 펫은 복구할 수 없습니다.')) return;
+
     var total = 0;
     var count = 0;
-    items.forEach(function (it) {
-      var n = everything ? state.inventory[it.id] || 0 : 1;
-      if (!n) return;
-      var r = GameState.payback(state, it.id, n);
-      if (r.ok) { total += r.point; count += n; }
+    candidates.forEach(function (entry) {
+      var r = GameState.payback(state, entry.item.id, entry.count);
+      if (r.ok) { total += r.point; count += entry.count; }
     });
-    if (!count) { showMessage('페이백할 아이템이 없습니다.'); return; }
     showMessage('펫 ' + count + '개를 페이백해 ' + point(total) + '를 받았습니다.');
     commit();
   }
@@ -504,15 +513,32 @@
 
   els.autoBtn.addEventListener('click', function () {
     if (state.pending) { showMessage('이전 결과를 먼저 확인해 주세요.'); return; }
+    var strategy = els.autoStrategy.options[els.autoStrategy.selectedIndex].textContent;
+    var target = els.autoTarget.options[els.autoTarget.selectedIndex].textContent;
+    var limit = Number(els.autoLimit.value);
+    var confirmation = [
+      '자동 합성을 시작할까요?',
+      '방식: ' + strategy,
+      '목표: ' + target,
+      '최대 사용 금액: ' + won(limit),
+      '결제: 캐시만 사용 (부족하면 자동 충전)'
+    ].join('\n');
+    if (!window.confirm(confirmation)) return;
+
     var sum = AutoSynth.run(state, {
       strategy: els.autoStrategy.value,
       target: els.autoTarget.value,
-      spendLimit: Number(els.autoLimit.value)
+      spendLimit: limit
     });
     commit();
     var found = sum.found ? sum.found.name : '';
+    var headline = sum.success
+      ? '목표 달성! 획득: ' + found
+      : sum.reason === 'maxSteps'
+        ? '안전 반복 횟수에 도달해 중단했습니다.'
+        : '사용 한도(' + won(limit) + ')에 도달해 중단했습니다.';
     var lines = [
-      sum.success ? '🎉 목표 달성! 획득: ' + found : '⛔ 사용 한도(' + won(Number(els.autoLimit.value)) + ')에 도달해 중단했습니다.',
+      headline,
       '이번 실행 사용 금액: ' + won(sum.spent),
       '구매 ' + sum.purchases + '회 · 원더베리 뽑기 ' + sum.draws + '회 · 스윗 합성 ' + sum.sweets + '회 · 드림 합성 ' + sum.dreams + '회'
     ];
