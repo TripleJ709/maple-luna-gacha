@@ -41,18 +41,24 @@
     lunaCrystal1: { label: '루나 크리스탈 1개', field: 'lunaCrystal', amount: 1, price: Data.PRICES.lunaCrystal1 }
   };
 
-  // 구매: 캐시 차감 + 누적 사용 금액 증가 + 재화 지급. 캐시가 부족하면 아무것도 바꾸지 않는다.
-  function purchase(state, productId) {
+  // 구매: 지정한 결제 수단에서 금액을 차감하고 재화를 지급한다. 캐시와 메이플포인트를 섞어 쓰지 않는다.
+  function purchase(state, productId, payment, quantity) {
     var product = Object.prototype.hasOwnProperty.call(PRODUCTS, productId) ? PRODUCTS[productId] : null;
+    payment = payment || 'cash';
+    quantity = quantity === undefined ? 1 : quantity;
     if (!product) return { ok: false, error: '알 수 없는 상품입니다.' };
-    // 메이플포인트는 캐시와 똑같이 쓸 수 있다. 메이플포인트를 먼저 쓰고 모자란 만큼 캐시를 쓴다.
-    if (state.cash + state.maplePoint < product.price) return { ok: false, error: '캐시가 부족합니다.' };
-    var byPoint = Math.min(state.maplePoint, product.price);
-    state.maplePoint -= byPoint;
-    state.cash -= product.price - byPoint;
-    state.totalSpent += product.price;
-    state[product.field] += product.amount;
-    return { ok: true };
+    if (payment !== 'cash' && payment !== 'maplePoint') return { ok: false, error: '결제 수단이 올바르지 않습니다.' };
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 100) {
+      return { ok: false, error: '구매 수량은 1개부터 100개까지 선택할 수 있습니다.' };
+    }
+    var totalPrice = product.price * quantity;
+    if (state[payment] < totalPrice) {
+      return { ok: false, error: payment === 'cash' ? '캐시가 부족합니다.' : '메이플포인트가 부족합니다.' };
+    }
+    state[payment] -= totalPrice;
+    state.totalSpent += totalPrice;
+    state[product.field] += product.amount * quantity;
+    return { ok: true, totalPrice: totalPrice, itemAmount: product.amount * quantity };
   }
 
   // 페이백: 인벤토리의 원더 펫(상급 5종)을 count개 돌려주고 메이플포인트를 받는다. (1개당 540P)

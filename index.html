@@ -139,6 +139,29 @@
     <button type="button" id="reset-btn" class="danger">모든 데이터 초기화</button>
   </footer>
 
+  <dialog id="purchase-dialog" aria-labelledby="purchase-title">
+    <h2 id="purchase-title">상품 구매</h2>
+    <div class="purchase-summary">
+      <img id="purchase-image" src="" alt="">
+      <div>
+        <strong id="purchase-name"></strong>
+        <span id="purchase-unit-price"></span>
+      </div>
+    </div>
+    <label class="quantity-field" for="purchase-quantity">
+      구매 수량
+      <input id="purchase-quantity" type="number" min="1" max="100" value="1" inputmode="numeric">
+    </label>
+    <p class="purchase-total">총 결제 금액 <strong id="purchase-total">0원</strong></p>
+    <p class="desc">캐시와 메이플포인트는 합산하지 않고 선택한 재화로 전액 결제합니다.</p>
+    <p id="purchase-error" role="alert"></p>
+    <div class="payment-actions">
+      <button type="button" id="pay-cash" class="primary"></button>
+      <button type="button" id="pay-point"></button>
+      <button type="button" id="purchase-cancel">취소</button>
+    </div>
+  </dialog>
+
   <dialog id="synth-dialog">
     <h2 id="synth-title">합성</h2>
     <p class="desc" id="synth-info"></p>
