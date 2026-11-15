@@ -13,6 +13,7 @@ test('data.js가 가리키는 이미지/영상 파일이 모두 존재', () => {
     });
   });
   assert.ok(fs.existsSync(path.join(root, Data.WONDER_BERRY_ICON)));
+  assert.ok(fs.existsSync(path.join(root, Data.LUNA_CRYSTAL_ICON)));
 });
 
 test('이미지가 전혀 없는 아이템은 루나 크리스탈 키뿐', () => {
