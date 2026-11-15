@@ -115,7 +115,8 @@
     SWEET_TABLE: SWEET_TABLE,
     DREAM_TABLE: DREAM_TABLE,
     KEY_ID: 'key',
-    WONDER_BERRY_ICON: 'assets/items/wonderberry.webp'
+    WONDER_BERRY_ICON: 'assets/items/wonderberry.webp',
+    LUNA_CRYSTAL_ICON: 'assets/items/luna-crystal.webp'
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
