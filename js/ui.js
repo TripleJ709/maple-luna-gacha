@@ -146,18 +146,12 @@
     }
   }
 
-  function rareTitle(rareItems, fallback) {
-    var petit = rareItems.filter(function (it) { return it.kind === GachaData.KIND.PETIT; })[0];
-    if (petit) return '🌙 루나 쁘띠 획득! 🌙';
-    return fallback;
-  }
-
   function showResults(title, items) {
     var rareItems = items.filter(function (it) { return it.grade === GachaData.GRADE.RARE; });
     var isRare = rareItems.length > 0;
     clearSparkles();
     els.dialog.classList.toggle('rare-result', isRare);
-    els.resultTitle.textContent = isRare ? rareTitle(rareItems, title) : title;
+    els.resultTitle.textContent = title;
     els.resultList.textContent = '';
     items.forEach(function (it) {
       var li = document.createElement('li');
